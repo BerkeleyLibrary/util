@@ -44,18 +44,15 @@ module BerkeleyLibrary
             expect(result).to eq(expected_body)
           end
 
-          it 'raises an error for a failure status' do
-            url = 'https://example.org/'
-            stub_request(:get, url).to_return(status: 404)
+          it "raises #{RestClient::Exception} in the event of an invalid response" do
+            aggregate_failures 'responses' do
+              [207, 400, 401, 403, 404, 405, 418, 451, 500, 503].each do |code|
+                url = "http://example.edu/#{code}"
+                stub_request(:get, url).to_return(status: code)
 
-            expect { Requester.get(url) }.to raise_error(RestClient::RequestFailed)
-          end
-
-          it 'raises an error for a weird non-failure status' do
-            url = 'https://example.org/'
-            stub_request(:get, url).to_return(status: 207)
-
-            expect { Requester.get(url) }.to raise_error(RestClient::RequestFailed)
+                expect { Requester.get(url) }.to raise_error(RestClient::Exception)
+              end
+            end
           end
 
           it 'handles redirects' do
