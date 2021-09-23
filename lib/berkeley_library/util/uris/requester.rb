@@ -17,7 +17,7 @@ module BerkeleyLibrary
           # @param headers [Hash] the request headers.
           # @return [String] the body as a string.
           # @raise [RestClient::Exception] in the event of an error.
-          def get(uri, params = {}, headers = {})
+          def get(uri, params: {}, headers: {})
             url_str = url_str_with_params(uri, params)
             resp = get_or_raise(url_str, headers)
             resp.body

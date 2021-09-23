@@ -28,8 +28,8 @@ module BerkeleyLibrary
       # @param headers [Hash] the request headers.
       # @return [String] the body as a string.
       # @raise [RestClient::Exception] in the event of an error.
-      def get(uri, params = {}, headers = {})
-        Requester.get(uri, params, headers)
+      def get(uri, params: {}, headers: {})
+        Requester.get(uri, params: params, headers: headers)
       end
 
       # Returns the specified URL as a URI.

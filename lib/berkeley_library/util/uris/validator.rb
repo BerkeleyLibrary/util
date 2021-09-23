@@ -13,7 +13,7 @@ module BerkeleyLibrary
           def uri_or_nil(url)
             return unless url
 
-            # noinspection RubyYardReturnMatch
+            # noinspection RubyMismatchedReturnType
             url.is_a?(URI) ? url : URI.parse(url.to_s)
           end
 

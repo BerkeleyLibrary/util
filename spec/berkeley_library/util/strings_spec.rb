@@ -3,6 +3,38 @@ require 'spec_helper'
 module BerkeleyLibrary
   module Util
     describe Strings do
+      describe :ascii_numeric do
+        it 'returns true for ASCII numeric strings' do
+          str = '8675309'
+          expect(Strings.ascii_numeric?(str)).to eq(true)
+        end
+
+        it 'returns false for non-ASCII numeric strings' do
+          strs = %w[
+            ٨٦٧٥٣٠٩
+            八六七五三〇九
+          ]
+          aggregate_failures 'non-ASCII numeric strings' do
+            strs.each do |str|
+              expect(Strings.ascii_numeric?(str)).to eq(false), "Expected #{str.inspect} to be non-ASCII-numeric"
+            end
+          end
+        end
+
+        it 'returns false for mixed ASCII numeric and non-numeric strings' do
+          strs = [
+            '867-5309',
+            '867 5309',
+            ' 8675309 '
+          ]
+          aggregate_failures 'ASCII mixed numeric and non-numeric strings' do
+            strs.each do |str|
+              expect(Strings.ascii_numeric?(str)).to eq(false), "Expected #{str.inspect} to be non-ASCII-numeric"
+            end
+          end
+        end
+      end
+
       describe :diff_index do
         it 'returns nil for identical strings' do
           s = 'elvis'

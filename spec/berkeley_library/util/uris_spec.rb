@@ -114,5 +114,20 @@ module BerkeleyLibrary::Util
         expect(new_uri).to eq(URI('https://example.org/foo/bar?qux=corge&grault=plugh#xyzzy'))
       end
     end
+
+    describe :get do
+      it 'makes a GET request' do
+        url = 'https://example.org/'
+        params = { p1: 1, p2: 2 }
+        headers = { 'X-help' => 'I am trapped in a unit test' }
+
+        url_with_query = "#{url}?#{URI.encode_www_form(params)}"
+        expected_body = 'Help! I am trapped in a unit test'
+        stub_request(:get, url_with_query).with(headers: headers).to_return(body: expected_body)
+
+        result = URIs.get(url, params: params, headers: headers)
+        expect(result).to eq(expected_body)
+      end
+    end
   end
 end
