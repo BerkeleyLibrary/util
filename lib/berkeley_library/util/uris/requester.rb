@@ -30,6 +30,8 @@ module BerkeleyLibrary
 
             elements = [].tap do |ee|
               ee << url_str
+              next if params.empty?
+
               ee << '?' unless url_str.include?('?')
               ee << URI.encode_www_form(params)
             end
