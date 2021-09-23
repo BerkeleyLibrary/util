@@ -1,3 +1,26 @@
+############################################################
+# Custom ignores
+
+# github-markdown-preview previews
+*.md.html
+
+# Additional IDEA/RubyMine ignores
+.idea/.rakeTasks
+
+# Don't commit Gemfile.lock for libraries
+Gemfile.lock
+
+# build artifacts
+/artifacts/*
+
+# log files
+/log/*
+
+Gemfile.lock
+
+############################################################
+# Generated ignores
+
 #### joe made this: http://goel.io/joe
 
 #### ruby ####
