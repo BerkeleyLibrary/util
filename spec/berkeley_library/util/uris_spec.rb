@@ -9,6 +9,29 @@ module BerkeleyLibrary::Util
         expect(new_uri).to eq(URI('https://example.org/foo/bar/qux/corge/garply'))
       end
 
+      it 'appends paths to bare URIs without root' do
+        original_url = 'https://example.org'
+        new_uri = URIs.append(original_url, 'foo', 'bar')
+        expected_uri = URI('https://example.org/foo/bar')
+        expect(new_uri).to eq(expected_uri)
+      end
+
+      # TODO: make this work
+      xit "doesn't append to a bare URI when there's nothing to append" do
+        original_url = 'https://example.org'
+        new_uri = URIs.append(original_url)
+        expected_uri = URI(original_url)
+        expect(new_uri).to eq(expected_uri)
+      end
+
+      # TODO: make this work
+      xit "doesn't append to a bare URI when there's only a query string" do
+        original_url = 'https://example.org'
+        new_uri = URIs.append(original_url, '?foo=bar')
+        expected_uri = URI("#{original_url}?foo=bar")
+        expect(new_uri).to eq(expected_uri)
+      end
+
       it 'does not modify the original URI' do
         original_uri = URI('https://example.org/foo/bar')
         original_url = original_uri.to_s

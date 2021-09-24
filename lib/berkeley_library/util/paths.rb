@@ -55,6 +55,14 @@ module BerkeleyLibrary
         clean(joined_raw)
       end
 
+      def abs?(path)
+        path.to_s.start_with?('/')
+      end
+
+      def ensure_abs(path)
+        abs?(path) ? path : "/#{path}"
+      end
+
       private
 
       def process_next(r, dotdot, path, out)

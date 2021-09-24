@@ -35,7 +35,8 @@ module BerkeleyLibrary
         # @raise URI::InvalidComponentError if appending the specified elements would create an invalid URI
         def to_uri
           original_uri.dup.tap do |new_uri|
-            new_uri.path = Paths.join(original_uri.path, *path_elements)
+            new_path = Paths.join(new_uri.path, *path_elements)
+            new_uri.path = Paths.ensure_abs(new_path)
             new_uri.query = query unless query_elements.empty?
             new_uri.fragment = fragment unless fragment_elements.empty?
           end
