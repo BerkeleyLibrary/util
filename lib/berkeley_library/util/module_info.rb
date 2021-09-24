@@ -9,7 +9,7 @@ module BerkeleyLibrary
         A collection of miscellaneous Ruby routines for the UC Berkeley Library.
       DESC
       LICENSE = 'MIT'.freeze
-      VERSION = '0.1.0'.freeze
+      VERSION = '0.1.1'.freeze
       HOMEPAGE = 'https://github.com/BerkeleyLibrary/util'.freeze
     end
   end
