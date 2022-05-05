@@ -19,3 +19,7 @@ Routines for modifying paths separated by forward slashes,
 ## [BerkeleyLibrary::Util::URIs](lib/berkeley_library/util/uris.rb)
 
 Routines for constructing, validating, and retrieving the content from URIs.
+
+## [BerkeleyLibrary::Util::Files](lib/berkeley_library/util/files.rb)
+
+Routines for working with file paths and IO objects.

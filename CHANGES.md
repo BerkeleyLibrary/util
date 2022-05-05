@@ -1,3 +1,7 @@
+# 0.1.2 (2022-05-05)
+
+- Adds `BerkeleyLibrary::Files`, which contains file and IO utility methods
+
 # 0.1.1 (2021-09-23)
 
 - `URIs.append` now handles bare URLs with empty paths, with the caveat that
