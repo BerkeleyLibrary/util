@@ -138,18 +138,44 @@ module BerkeleyLibrary::Util
       end
     end
 
-    describe :get do
-      it 'makes a GET request' do
-        url = 'https://example.org/'
-        params = { p1: 1, p2: 2 }
-        headers = { 'X-help' => 'I am trapped in a unit test' }
+    describe 'requests' do
+      let(:url) { 'https://example.org/' }
+      let(:params) { { p1: 1, p2: 2 } }
+      let(:headers) { { 'X-help' => 'I am trapped in a unit test' } }
+      let(:url_with_query) { "#{url}?#{URI.encode_www_form(params)}" }
+      let(:expected_body) { 'Help! I am trapped in a unit test' }
 
-        url_with_query = "#{url}?#{URI.encode_www_form(params)}"
-        expected_body = 'Help! I am trapped in a unit test'
-        stub_request(:get, url_with_query).with(headers: headers).to_return(body: expected_body)
+      describe :get do
+        it 'makes a GET request' do
+          stub_request(:get, url_with_query).with(headers: headers).to_return(body: expected_body)
 
-        result = URIs.get(url, params: params, headers: headers)
-        expect(result).to eq(expected_body)
+          result = URIs.get(url, params: params, headers: headers)
+          expect(result).to eq(expected_body)
+        end
+
+        it 'raises an error in the event of a 404' do
+          stub_request(:get, url_with_query).with(headers: headers).to_return(status: 404, body: expected_body)
+
+          expect { URIs.get(url, params: params, headers: headers) }.to raise_error(RestClient::NotFound)
+        end
+      end
+
+      describe :get_response do
+        it 'makes a GET request' do
+          stub_request(:get, url_with_query).with(headers: headers).to_return(body: expected_body)
+
+          response = URIs.get_response(url, params: params, headers: headers)
+          expect(response.body).to eq(expected_body)
+          expect(response.code).to eq(200)
+        end
+
+        it 'returns the response even for errors' do
+          stub_request(:get, url_with_query).with(headers: headers).to_return(status: 404, body: expected_body)
+
+          response = URIs.get_response(url, params: params, headers: headers)
+          expect(response.body).to eq(expected_body)
+          expect(response.code).to eq(404)
+        end
       end
     end
   end

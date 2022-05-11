@@ -10,7 +10,7 @@ module BerkeleyLibrary
         class << self
           include BerkeleyLibrary::Logging
 
-          # Performs a GET request.
+          # Performs a GET request and returns the response body as a string.
           #
           # @param uri [URI, String] the URI to GET
           # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
@@ -18,12 +18,28 @@ module BerkeleyLibrary
           # @return [String] the body as a string.
           # @raise [RestClient::Exception] in the event of an error.
           def get(uri, params: {}, headers: {})
-            url_str = url_str_with_params(uri, params)
-            resp = get_or_raise(url_str, headers)
+            resp = make_get_request(uri, params, headers)
             resp.body
           end
 
+          # Performs a GET request and returns the response.
+          #
+          # @param uri [URI, String] the URI to GET
+          # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
+          # @param headers [Hash] the request headers.
+          # @return [RestClient::Response] the body as a string.
+          def get_response(uri, params: {}, headers: {})
+            make_get_request(uri, params, headers)
+          rescue RestClient::Exception => e
+            e.response
+          end
+
           private
+
+          def make_get_request(uri, params, headers)
+            url_str = url_str_with_params(uri, params)
+            get_or_raise(url_str, headers)
+          end
 
           def url_str_with_params(uri, params)
             raise ArgumentError, 'uri cannot be nil' unless (url_str = Validator.url_str_or_nil(uri))
@@ -40,6 +56,7 @@ module BerkeleyLibrary
             uri.to_s
           end
 
+          # @return [RestClient::Response]
           def get_or_raise(url_str, headers)
             resp = RestClient.get(url_str, headers)
             begin
@@ -47,6 +64,7 @@ module BerkeleyLibrary
 
               raise(exception_for(resp, status))
             ensure
+              # noinspection RubyMismatchedReturnType
               logger.info("GET #{url_str} returned #{status}")
             end
           end

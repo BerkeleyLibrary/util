@@ -32,6 +32,16 @@ module BerkeleyLibrary
         Requester.get(uri, params: params, headers: headers)
       end
 
+      # Performs a GET request and returns the response.
+      #
+      # @param uri [URI, String] the URI to GET
+      # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
+      # @param headers [Hash] the request headers.
+      # @return [RestClient::Response] the body as a string.
+      def get_response(uri, params: {}, headers: {})
+        Requester.get_response(uri, params: params, headers: headers)
+      end
+
       # Returns the specified URL as a URI.
       # @param url [String, URI] the URL.
       # @return [URI] the URI.
