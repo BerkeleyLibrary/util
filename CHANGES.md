@@ -1,10 +1,15 @@
+# 0.1.3 (2022-05-11)
+
+- Adds `URIs#get_response`, which returns a complete `RestClient::Response` rather than just
+  the response body.
+
 # 0.1.2 (2022-05-05)
 
 - Adds `BerkeleyLibrary::Files`, which contains file and IO utility methods
 
 # 0.1.1 (2021-09-23)
 
-- `URIs.append` now handles bare URLs with empty paths, with the caveat that
+- `URIs#append` now handles bare URLs with empty paths, with the caveat that
   a root path `/` will always be added, even if there are no path elements to append.
 
 # 0.1.0 (2021-09-23)
