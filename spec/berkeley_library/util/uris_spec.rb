@@ -178,5 +178,37 @@ module BerkeleyLibrary::Util
         end
       end
     end
+
+    describe :safe_parse_uri do
+      it 'returns a URI unchanged' do
+        uri = URI.parse('http://example.org/')
+        expect(URIs.safe_parse_uri(uri)).to be(uri)
+      end
+
+      it 'converts a string to a URI' do
+        url = 'http://example.org/'
+        expect(URIs.safe_parse_uri(url)).to eq(URI.parse(url))
+      end
+
+      it 'returns nil for nil' do
+        expect(URIs.safe_parse_uri(nil)).to be_nil
+      end
+
+      context 'invalid URL strings' do
+        it 'returns nil' do
+          bad_url = 'not a uri'
+          expect(URIs.safe_parse_uri(bad_url)).to be_nil
+        end
+
+        it 'logs a warning' do
+          logger = instance_double(Ougai::Logger)
+          allow(BerkeleyLibrary::Logging).to receive(:logger).and_return(logger)
+
+          bad_url = 'not a uri'
+          expect(logger).to receive(:warn).with(/#{bad_url}/, kind_of(URI::InvalidURIError))
+          expect(URIs.safe_parse_uri(bad_url)).to be_nil
+        end
+      end
+    end
   end
 end

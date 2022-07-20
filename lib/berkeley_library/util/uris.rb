@@ -1,3 +1,4 @@
+require 'berkeley_library/logging'
 require 'berkeley_library/util/uris/appender'
 require 'berkeley_library/util/uris/requester'
 require 'berkeley_library/util/uris/validator'
@@ -5,6 +6,8 @@ require 'berkeley_library/util/uris/validator'
 module BerkeleyLibrary
   module Util
     module URIs
+      include BerkeleyLibrary::Logging
+
       class << self
         include URIs
       end
@@ -42,12 +45,25 @@ module BerkeleyLibrary
         Requester.get_response(uri, params: params, headers: headers)
       end
 
-      # Returns the specified URL as a URI.
-      # @param url [String, URI] the URL.
-      # @return [URI] the URI.
-      # @raise [URI::InvalidURIError] if `url` cannot be parsed as a URI.
+      # Returns the specified URL as a URI, or `nil` if the URL is `nil`.
+      # @param url [String, URI, nil] the URL.
+      # @return [URI] the URI, or `nil`.
+      # @raise [URI::InvalidURIError] if `url` is not `nil` and cannot be
+      #   parsed as a URI.
       def uri_or_nil(url)
         Validator.uri_or_nil(url)
+      end
+
+      # Returns the specified URL as a URI, or `nil` if the URL cannot
+      # be parsed.
+      # @param url [Object, nil] the URL.
+      # @return [URI, nil] the URI, or `nil`.
+      def safe_parse_uri(url)
+        # noinspection RubyMismatchedArgumentType
+        uri_or_nil(url)
+      rescue URI::InvalidURIError => e
+        logger.warn("Error parsing URL #{url.inspect}", e)
+        nil
       end
     end
   end

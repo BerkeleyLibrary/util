@@ -6,10 +6,11 @@ module BerkeleyLibrary
       module Validator
         class << self
 
-          # Returns the specified URL as a URI.
-          # @param url [String, URI] the URL.
-          # @return [URI] the URI.
-          # @raise [URI::InvalidURIError] if `url` cannot be parsed as a URI.
+          # Returns the specified URL as a URI, or `nil` if the URI is `nil`.
+          # @param url [String, URI, nil] the URL.
+          # @return [URI] the URI, or `nil`.
+          # @raise [URI::InvalidURIError] if `url` is not `nil` and cannot be
+          #   parsed as a URI.
           def uri_or_nil(url)
             return unless url
 
