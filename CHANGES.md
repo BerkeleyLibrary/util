@@ -1,3 +1,10 @@
+# 0.1.4 (2022-07-20)
+
+- Adds `URIs#safe_parse_uri`, which returns `nil` for invalid URLs (unlike `URIs#uri_or_nil`, which
+  raises `URI::InvalidURIError` for non-nil, non-parseable URLs)
+- Updates documentation for `URIs#uri_or_nil` and `Validator#uri_or_nil` to clarify that
+  `nil` is an acceptable argument.
+
 # 0.1.3 (2022-05-11)
 
 - Adds `URIs#get_response`, which returns a complete `RestClient::Response` rather than just
