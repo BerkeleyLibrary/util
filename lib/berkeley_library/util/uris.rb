@@ -8,6 +8,8 @@ module BerkeleyLibrary
     module URIs
       include BerkeleyLibrary::Logging
 
+      UTF_8 = Encoding::UTF_8
+
       class << self
         include URIs
       end
@@ -78,6 +80,19 @@ module BerkeleyLibrary
         Validator.uri_or_nil(url)
       end
 
+      # Escapes the specified string so that it can be used as a URL path segment,
+      # replacing disallowed characters (including /) with percent-encodings as needed.
+      def path_escape(s)
+        raise ArgumentError, "Can't escape #{s.inspect}: not a string" unless s.respond_to?(:encoding)
+        raise ArgumentError, "Can't escape #{s.inspect}: expected #{UTF_8}, was #{s.encoding}" unless s.encoding == UTF_8
+
+        ''.tap do |escaped|
+          s.bytes.each do |b|
+            escaped << (should_escape?(b, :path_segment) ? '%%%02X' % b : b.chr)
+          end
+        end
+      end
+
       # Returns the specified URL as a URI, or `nil` if the URL cannot
       # be parsed.
       # @param url [Object, nil] the URL.
@@ -89,6 +104,32 @@ module BerkeleyLibrary
         logger.warn("Error parsing URL #{url.inspect}", e)
         nil
       end
+
+      private
+
+      # TODO: extend to cover other modes - host, zone, path, password, query, fragment
+      #       cf. https://github.com/golang/go/blob/master/src/net/url/url.go
+      ALLOWED_BYTES_BY_MODE = {
+        path_segment: [0x24, 0x26, 0x2b, 0x3a, 0x3d, 0x40] # @ & = + $
+      }.freeze
+
+      def should_escape?(b, mode)
+        return false if unreserved?(b)
+        return false if ALLOWED_BYTES_BY_MODE[mode]&.include?(b)
+
+        true
+      end
+
+      # rubocop:disable Metrics/CyclomaticComplexity
+      def unreserved?(byte)
+        return true if byte >= 0x41 && byte <= 0x5a # A-Z
+        return true if byte >= 0x61 && byte <= 0x7a # a-z
+        return true if byte >= 0x30 && byte <= 0x39 # 0-9
+        return true if [0x2d, 0x2e, 0x5f, 0x7e].include?(byte) # - . _ ~
+
+        false
+      end
+      # rubocop:enable Metrics/CyclomaticComplexity
     end
   end
 end

@@ -1,5 +1,6 @@
 # 0.1.5 (next)
 
+- Adds `URIs#path_escape` to escape URL path segments
 - Adds `URIs#head` and `URIs#head_response`, to make a HEAD request and return the HTTP status code 
   and raw response object, respectively
 - Clarifies documentation for `URIs#get` and `URIs#get_response` regarding unsuccessful requests

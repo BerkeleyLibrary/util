@@ -55,6 +55,10 @@ Style/CommentedKeyword:
 Style/Documentation:
   Enabled: false
 
+# You say "cryptic", I say "compact"
+Style/FormatString:
+  EnforcedStyle: percent
+
 # Adding more line noise to format strings will not improve them
 Style/FormatStringToken:
   Enabled: false

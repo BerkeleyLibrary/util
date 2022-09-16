@@ -16,16 +16,14 @@ module BerkeleyLibrary::Util
         expect(new_uri).to eq(expected_uri)
       end
 
-      # TODO: make this work
-      xit "doesn't append to a bare URI when there's nothing to append" do
+      it 'returns a bare URI when there\'s nothing to append' do
         original_url = 'https://example.org'
         new_uri = URIs.append(original_url)
         expected_uri = URI(original_url)
         expect(new_uri).to eq(expected_uri)
       end
 
-      # TODO: make this work
-      xit "doesn't append to a bare URI when there's only a query string" do
+      it 'appends to a bare URI even when there\'s only a query string' do
         original_url = 'https://example.org'
         new_uri = URIs.append(original_url, '?foo=bar')
         expected_uri = URI("#{original_url}?foo=bar")
@@ -136,6 +134,19 @@ module BerkeleyLibrary::Util
         new_uri = URIs.append(original_uri, '?qux=corge', '&grault=plugh#xyzzy')
         expect(new_uri).to eq(URI('https://example.org/foo/bar?qux=corge&grault=plugh#xyzzy'))
       end
+
+      it 'rejects invalid characters' do
+        original_uri = URI('https://example.org/')
+        expect { URIs.append(original_uri, '精力善用') }.to raise_error(URI::InvalidComponentError)
+      end
+
+      it 'accepts percent-encoded path segments' do
+        original_uri = URI('https://example.org/')
+        encoded_segment = URIs.path_escape('精力善用')
+        new_uri = URIs.append(original_uri, encoded_segment, 'foo.html')
+        expected_url = "https://example.org/#{encoded_segment}/foo.html"
+        expect(new_uri).to eq(URI(expected_url))
+      end
     end
 
     describe 'requests' do
@@ -244,6 +255,50 @@ module BerkeleyLibrary::Util
           expect(logger).to receive(:warn).with(/#{bad_url}/, kind_of(URI::InvalidURIError))
           expect(URIs.safe_parse_uri(bad_url)).to be_nil
         end
+      end
+    end
+
+    describe :path_escape do
+      let(:in_out) do
+        {
+          '' => '',
+          'corge' => 'corge',
+          'foo+bar' => 'foo+bar',
+          'qux/quux' => 'qux%2Fquux',
+          'foo bar baz' => 'foo%20bar%20baz',
+          '25%' => '25%25',
+          "\t !\"#$%&'()*+,/:;<=>?@[\\]^`{|}☺" => '%09%20%21%22%23$%25&%27%28%29%2A+%2C%2F:%3B%3C=%3E%3F@%5B%5C%5D%5E%60%7B%7C%7D%E2%98%BA',
+          '精力善用' => '%E7%B2%BE%E5%8A%9B%E5%96%84%E7%94%A8'
+        }
+      end
+
+      it 'escapes a path segment' do
+        aggregate_failures do
+          in_out.each do |in_str, out_str|
+            expect(URIs.path_escape(in_str)).to eq(out_str)
+          end
+        end
+      end
+
+      it 'rejects non-strings' do
+        str = in_out.keys.last
+        expect { URIs.path_escape(str.bytes) }.to raise_error(ArgumentError)
+      end
+
+      it 'rejects non-UTF-8 strings' do
+        str = in_out.keys.last
+        expect { URIs.path_escape(str.encode(Encoding::Shift_JIS)) }.to raise_error(ArgumentError)
+      end
+
+      it 'accepts non-UTF-8 strings converted to UTF-8' do
+        in_str = in_out.keys.last
+        out_str = in_out[in_str]
+
+        # OK, we're really just testing String#encode here, but
+        # it's useful for documentation
+        in_str_sjis = in_str.encode(Encoding::Shift_JIS)
+        in_str_utf8 = in_str_sjis.encode(Encoding::UTF_8)
+        expect(URIs.path_escape(in_str_utf8)).to eq(out_str)
       end
     end
   end
