@@ -1,4 +1,4 @@
-# 0.1.5 (next)
+# 0.1.5 (2022-09-16)
 
 - Adds `URIs#path_escape` to escape URL path segments
 - Adds `URIs#head` and `URIs#head_response`, to make a HEAD request and return the HTTP status code 
