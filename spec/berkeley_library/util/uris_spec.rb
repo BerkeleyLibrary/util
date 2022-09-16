@@ -177,6 +177,42 @@ module BerkeleyLibrary::Util
           expect(response.code).to eq(404)
         end
       end
+
+      describe :head do
+        it 'makes a HEAD request' do
+          expected_status = 200
+          stub_request(:head, url_with_query).with(headers: headers).to_return(status: expected_status)
+
+          result = URIs.head(url, params: params, headers: headers)
+          expect(result).to eq(expected_status)
+        end
+
+        it 'returns the status even for unsuccessful requests' do
+          expected_status = 404
+          stub_request(:head, url_with_query).with(headers: headers).to_return(status: expected_status)
+
+          result = URIs.head(url, params: params, headers: headers)
+          expect(result).to eq(expected_status)
+        end
+      end
+
+      describe :head_response do
+        it 'makes a HEAD request' do
+          stub_request(:head, url_with_query).with(headers: headers).to_return(body: expected_body)
+
+          response = URIs.head_response(url, params: params, headers: headers)
+          expect(response.body).to eq(expected_body)
+          expect(response.code).to eq(200)
+        end
+
+        it 'returns the response even for errors' do
+          stub_request(:head, url_with_query).with(headers: headers).to_return(status: 404, body: expected_body)
+
+          response = URIs.head_response(url, params: params, headers: headers)
+          expect(response.body).to eq(expected_body)
+          expect(response.code).to eq(404)
+        end
+      end
     end
 
     describe :safe_parse_uri do

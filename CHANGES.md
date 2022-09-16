@@ -1,3 +1,9 @@
+# 0.1.5 (next)
+
+- Adds `URIs#head` and `URIs#head_response`, to make a HEAD request and return the HTTP status code 
+  and raw response object, respectively
+- Clarifies documentation for `URIs#get` and `URIs#get_response` regarding unsuccessful requests
+
 # 0.1.4 (2022-07-20)
 
 - Adds `URIs#safe_parse_uri`, which returns `nil` for invalid URLs (unlike `URIs#uri_or_nil`, which

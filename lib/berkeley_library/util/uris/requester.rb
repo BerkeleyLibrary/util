@@ -16,29 +16,56 @@ module BerkeleyLibrary
           # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
           # @param headers [Hash] the request headers.
           # @return [String] the body as a string.
-          # @raise [RestClient::Exception] in the event of an error.
+          # @raise [RestClient::Exception] in the event of an unsuccessful request.
           def get(uri, params: {}, headers: {})
-            resp = make_get_request(uri, params, headers)
+            resp = make_request(:get, uri, params, headers)
             resp.body
           end
 
-          # Performs a GET request and returns the response.
+          # Performs a HEAD request and returns the response status as an integer.
+          # Note that unlike {Requester#get}, this does not raise an error in the
+          # event of an unsuccessful request.
+          #
+          # @param uri [URI, String] the URI to HEAD
+          # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
+          # @param headers [Hash] the request headers.
+          # @return [Integer] the response code as an integer.
+          def head(uri, params: {}, headers: {})
+            head_response(uri, params: params, headers: headers).code
+          end
+
+          # Performs a GET request and returns the response, even in the event of
+          # a failed request.
           #
           # @param uri [URI, String] the URI to GET
           # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
           # @param headers [Hash] the request headers.
           # @return [RestClient::Response] the body as a string.
           def get_response(uri, params: {}, headers: {})
-            make_get_request(uri, params, headers)
+            make_request(:get, uri, params, headers)
+          rescue RestClient::Exception => e
+            e.response
+          end
+
+          # Performs a HEAD request and returns the response, even in the event of
+          # a failed request.
+          #
+          # @param uri [URI, String] the URI to HEAD
+          # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
+          # @param headers [Hash] the request headers.
+          # @return [RestClient::Response] the body as a string.
+          def head_response(uri, params: {}, headers: {})
+            make_request(:head, uri, params, headers)
           rescue RestClient::Exception => e
             e.response
           end
 
           private
 
-          def make_get_request(uri, params, headers)
+          # @return [RestClient::Response]
+          def make_request(method, uri, params, headers)
             url_str = url_str_with_params(uri, params)
-            get_or_raise(url_str, headers)
+            req_resp_or_raise(method, url_str, headers)
           end
 
           def url_str_with_params(uri, params)
@@ -57,15 +84,15 @@ module BerkeleyLibrary
           end
 
           # @return [RestClient::Response]
-          def get_or_raise(url_str, headers)
-            resp = RestClient.get(url_str, headers)
+          def req_resp_or_raise(method, url_str, headers)
+            resp = RestClient::Request.execute(method: method, url: url_str, headers: headers)
             begin
               return resp if (status = resp.code) == 200
 
               raise(exception_for(resp, status))
             ensure
               # noinspection RubyMismatchedReturnType
-              logger.info("GET #{url_str} returned #{status}")
+              logger.info("#{method.to_s.upcase} #{url_str} returned #{status}")
             end
           end
 

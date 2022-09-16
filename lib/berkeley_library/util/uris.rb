@@ -24,18 +24,31 @@ module BerkeleyLibrary
         Appender.new(uri, *elements).to_uri
       end
 
-      # Performs a GET request.
+      # Performs a GET request and returns the response body as a string.
       #
       # @param uri [URI, String] the URI to GET
       # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
       # @param headers [Hash] the request headers.
       # @return [String] the body as a string.
-      # @raise [RestClient::Exception] in the event of an error.
+      # @raise [RestClient::Exception] in the event of an unsuccessful request.
       def get(uri, params: {}, headers: {})
         Requester.get(uri, params: params, headers: headers)
       end
 
-      # Performs a GET request and returns the response.
+      # Performs a HEAD request and returns the response status as an integer.
+      # Note that unlike {Requester#get}, this does not raise an error in the
+      # event of an unsuccessful request.
+      #
+      # @param uri [URI, String] the URI to HEAD
+      # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
+      # @param headers [Hash] the request headers.
+      # @return [Integer] the response code as an integer.
+      def head(uri, params: {}, headers: {})
+        Requester.head(uri, params: params, headers: headers)
+      end
+
+      # Performs a GET request and returns the response, even in the event of
+      # a failed request.
       #
       # @param uri [URI, String] the URI to GET
       # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
@@ -43,6 +56,17 @@ module BerkeleyLibrary
       # @return [RestClient::Response] the body as a string.
       def get_response(uri, params: {}, headers: {})
         Requester.get_response(uri, params: params, headers: headers)
+      end
+
+      # Performs a HEAD request and returns the response, even in the event of
+      # a failed request.
+      #
+      # @param uri [URI, String] the URI to HEAD
+      # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
+      # @param headers [Hash] the request headers.
+      # @return [RestClient::Response] the body as a string.
+      def head_response(uri, params: {}, headers: {})
+        Requester.head_response(uri, params: params, headers: headers)
       end
 
       # Returns the specified URL as a URI, or `nil` if the URL is `nil`.
