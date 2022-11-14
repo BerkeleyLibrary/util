@@ -11,8 +11,8 @@ module BerkeleyLibrary
       end
 
       def parent_exists?(path)
-        path.respond_to?(:parent) && path.parent.exist? ||
-          path.respond_to?(:to_str) && Pathname.new(path).parent.exist?
+        (path.respond_to?(:parent) && path.parent.exist?) ||
+          (path.respond_to?(:to_str) && Pathname.new(path).parent.exist?)
       end
 
       # Returns true if `obj` is close enough to an IO object for Nokogiri

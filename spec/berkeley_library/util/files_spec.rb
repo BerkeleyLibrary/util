@@ -8,6 +8,7 @@ module BerkeleyLibrary
       attr_reader :tmpdir
 
       before { @tmpdir = Dir.mktmpdir(basename) }
+
       after { FileUtils.remove_entry(tmpdir) }
 
       describe :file_exists? do
