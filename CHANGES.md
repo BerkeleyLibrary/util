@@ -5,6 +5,8 @@
 - Fix issue in `URIs#append` (and `Appender`) where `?` would not be accepted in
   query strings or fragments, contrary to RFC 3986 §3.
 - Fix documentation for `Arrays#find_indices`.
+- Fix issue where `Arrays#find_index` would raise a confusing `NameError`
+  instead of a helpful `ArgumentError` if passed too many arguments.
 
 # 0.1.5 (2022-09-16)
 

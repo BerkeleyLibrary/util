@@ -90,7 +90,7 @@ module BerkeleyLibrary
       #   @param start_index [Integer] the index to start with
       #   @return [Enumerator] a new enumerator
       def find_index(*args, in_array:, start_index: 0, &block)
-        raise ArgumentError, "wrong number of arguments (given #{value.length}, expected 0..1" if args.size > 1
+        raise ArgumentError, "wrong number of arguments (given #{args.length}, expected 0..1" if args.size > 1
         return Enumerator.new { |y| find_index(in_array: in_array, start_index: start_index, &y) } if args.empty? && !block_given?
         return unless (relative_index = in_array[start_index..].find_index(*args, &block))
 
