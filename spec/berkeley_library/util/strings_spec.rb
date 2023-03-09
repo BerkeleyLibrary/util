@@ -41,6 +41,10 @@ module BerkeleyLibrary
           expect(Strings.diff_index(s, s)).to be_nil
         end
 
+        it 'returns nil for non-strings' do
+          expect(Strings.diff_index(2, ['2'])).to be_nil
+        end
+
         it 'returns the index for different strings' do
           s1 = 'elvis aaron presley'
           s2 = 'elvis nikita presley'

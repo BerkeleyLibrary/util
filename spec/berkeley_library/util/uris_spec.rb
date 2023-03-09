@@ -147,6 +147,14 @@ module BerkeleyLibrary::Util
         expected_url = "https://example.org/#{encoded_segment}/foo.html"
         expect(new_uri).to eq(URI(expected_url))
       end
+
+      it 'accepts path segments with allowed punctuation' do
+        original_uri = URI('https://example.org/')
+        path = 'foo/bar/baz@qux&corge=garply+grault$waldo/fred'
+        new_uri = URIs.append(original_uri, path, 'plugh')
+        expected_url = "#{original_uri}#{path}/plugh"
+        expect(new_uri).to eq(URI(expected_url))
+      end
     end
 
     describe 'requests' do
@@ -266,6 +274,7 @@ module BerkeleyLibrary::Util
           'foo+bar' => 'foo+bar',
           'qux/quux' => 'qux%2Fquux',
           'foo bar baz' => 'foo%20bar%20baz',
+          'Corge-Grault.Fred_Waldo~Plugh' => 'Corge-Grault.Fred_Waldo~Plugh',
           '25%' => '25%25',
           "\t !\"#$%&'()*+,/:;<=>?@[\\]^`{|}☺" => '%09%20%21%22%23$%25&%27%28%29%2A+%2C%2F:%3B%3C=%3E%3F@%5B%5C%5D%5E%60%7B%7C%7D%E2%98%BA',
           '精力善用' => '%E7%B2%BE%E5%8A%9B%E5%96%84%E7%94%A8'

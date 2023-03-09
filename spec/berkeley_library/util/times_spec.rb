@@ -33,6 +33,10 @@ module BerkeleyLibrary
           # noinspection RubyYardParamTypeMatch
           expect { Times.ensure_utc(Object.new) }.to raise_error(ArgumentError)
         end
+
+        it 'returns nil for nil' do
+          expect(Times.ensure_utc(nil)).to be_nil
+        end
       end
     end
   end
