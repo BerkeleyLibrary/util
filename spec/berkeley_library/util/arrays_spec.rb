@@ -113,12 +113,13 @@ module BerkeleyLibrary::Util
         ]
         sources.each do |source|
           expect(Arrays.find_indices(for_array: source, in_array: target)).to be_nil
+          expect(Arrays.find_indices(for_array: source, in_array: target) { |s, t| t == s.to_s }).to be_nil
         end
       end
 
       it 'takes a comparison block' do
         sub = %i[a c e]
-        expect(Arrays.find_indices(for_array: sub, in_array: target) { |source, target| target == source.to_s }).to eq([0, 2, 4])
+        expect(Arrays.find_indices(for_array: sub, in_array: target) { |s, t| t == s.to_s }).to eq([0, 2, 4])
       end
     end
 
@@ -143,6 +144,10 @@ module BerkeleyLibrary::Util
       it 'returns nil if no matching value found' do
         expect(Arrays.find_index(in_array: arr, &:odd?)).to be_nil
         expect(Arrays.find_index(in_array: arr, start_index: 2) { |x| x < 4 }).to be_nil
+      end
+
+      it 'raises ArgumentError if given extra arguments' do
+        expect { Arrays.find_index(1, 2, 3, in_array: [1, 2, 3]) }.to raise_error(ArgumentError)
       end
 
       # rubocop:disable Lint/Void
@@ -325,6 +330,10 @@ module BerkeleyLibrary::Util
     describe :invert do
       it 'inverts an array of ints' do
         expect(Arrays.invert([0, 2, 3])).to eq([0, nil, 1, 2])
+      end
+
+      it 'returns nil if given nil' do
+        expect(Arrays.invert(nil)).to be_nil
       end
 
       it 'fails if values are not ints' do
