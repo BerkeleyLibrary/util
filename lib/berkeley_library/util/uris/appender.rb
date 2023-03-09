@@ -22,10 +22,7 @@ module BerkeleyLibrary
 
           @elements = elements.map(&:to_s)
           @elements.each_with_index do |element, elem_index|
-            next start_query_at(elem_index) if element.include?('?')
-            next start_fragment_at(elem_index) if element.include?('#')
-
-            add_element(element)
+            handle_element(element, elem_index)
           end
         end
 
@@ -43,6 +40,16 @@ module BerkeleyLibrary
         end
 
         private
+
+        def handle_element(element, elem_index)
+          h_index = element.index('#')
+          q_index = element.index('?')
+          # per RFC 3986 §3, fragment (or query) can contain '?', but query can't contain '#'
+          return start_fragment_at(elem_index) if h_index && (q_index.nil? || h_index < q_index)
+          return start_query_at(elem_index) if q_index && !(in_query? || in_fragment?)
+
+          add_element(element)
+        end
 
         def state
           @state ||= :path
@@ -77,24 +84,21 @@ module BerkeleyLibrary
         end
 
         def start_query_at(elem_index)
-          raise URI::InvalidComponentError, err_query_after_fragment(elem_index) if in_fragment?
-          raise URI::InvalidComponentError, err_too_many_queries(elem_index) unless query_elements.empty?
-
           handle_query_start(elem_index)
           @state = :query
         end
 
         def start_fragment_at(elem_index)
           raise URI::InvalidComponentError, err_too_many_fragments(elem_index) unless fragment_elements.empty?
-          raise URI::InvalidComponentError, err_query_after_fragment(elem_index) if query_after_fragment?(elem_index)
+          raise URI::InvalidComponentError, err_too_many_fragments(elem_index) if too_many_fragments?(elem_index)
 
           handle_fragment_start(elem_index)
           @state = :fragment
         end
 
-        def query_after_fragment?(elem_index)
+        def too_many_fragments?(elem_index)
           e = elements[elem_index]
-          e.index('?', e.index('#'))
+          e.index('#', 1 + e.index('#'))
         end
 
         def add_element(e)
@@ -122,7 +126,7 @@ module BerkeleyLibrary
           return q_start unless (f_index = q_start.index('#'))
 
           next_index = elem_index + 1
-          q_start, q_next = split_around(q_start, f_index)           # NOTE: this doesn't return the '#'
+          q_start, q_next = split_around(q_start, f_index) # NOTE: this doesn't return the '#'
           elements[next_index] = "##{q_next}#{elements[next_index]}" #       so we prepend one here
           q_start
         end
@@ -144,14 +148,6 @@ module BerkeleyLibrary
 
         def split_around(s, i)
           [s[0...i], s[(i + 1)..]]
-        end
-
-        def err_too_many_queries(elem_index)
-          "#{elements[elem_index].inspect}: URI already has a query string: #{query.inspect}"
-        end
-
-        def err_query_after_fragment(elem_index)
-          "#{elements[elem_index].inspect}: Query delimiter '?' cannot follow fragment delimeter '#'"
         end
 
         def err_too_many_fragments(elem_index)

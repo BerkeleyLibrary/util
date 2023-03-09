@@ -3,6 +3,10 @@ require 'spec_helper'
 module BerkeleyLibrary::Util
   describe URIs do
     describe :append do
+      it 'rejects a nil URI' do
+        expect { URIs.append(nil, 'foo') }.to raise_error(ArgumentError)
+      end
+
       it 'appends paths' do
         original_uri = URI('https://example.org/foo/bar')
         new_uri = URIs.append(original_uri, 'qux', 'corge', 'garply')
@@ -92,29 +96,67 @@ module BerkeleyLibrary::Util
         expect(new_uri).to eq(URI('https://example.org/foo/bar/qux/corge/garply?baz=qux#grault'))
       end
 
-      it 'rejects a query string if the original URI already has one' do
-        original_uri = URI('https://example.org/foo/bar?baz=qux')
-        expect { URIs.append(original_uri, '/qux?corge') }.to raise_error(URI::InvalidComponentError)
-      end
-
       it 'rejects a fragment if the original URI already has one' do
         original_uri = URI('https://example.org/foo/bar#baz')
         expect { URIs.append(original_uri, '/qux#corge') }.to raise_error(URI::InvalidComponentError)
       end
 
-      it 'rejects appending multiple queries' do
+      # Per RFC3986, "3.4. Query"
+      it 'allows queries containing ?' do
         original_uri = URI('https://example.org/foo/bar')
-        expect { URIs.append(original_uri, 'baz?qux=corge', 'grault?plugh=xyzzy') }.to raise_error(URI::InvalidComponentError)
+        expected_url = "#{original_uri}/baz?qux=corge?grault?plugh=xyzzy"
+        expected_uri = URI.parse(expected_url)
+
+        uri1 = URIs.append(original_uri, 'baz?qux=corge', '?grault?plugh=xyzzy')
+        expect(uri1).to eq(expected_uri)
+
+        uri2 = URIs.append(original_uri, 'baz?qux=corge?grault?plugh=xyzzy')
+        expect(uri2).to eq(expected_uri)
       end
 
-      it 'rejects appending multiple fragments' do
+      # Per RFC3986, "3.4. Query"
+      it 'allows queries containing /' do
+        original_uri = URI('https://example.org/foo/bar')
+        expected_url = "#{original_uri}/baz?qux=corge/grault/plugh=xyzzy"
+        expected_uri = URI.parse(expected_url)
+
+        uri1 = URIs.append(original_uri, 'baz?qux=corge', '/grault/plugh=xyzzy')
+        expect(uri1).to eq(expected_uri)
+
+        uri2 = URIs.append(original_uri, 'baz?qux=corge/grault/plugh=xyzzy')
+        expect(uri2).to eq(expected_uri)
+      end
+
+      it 'rejects fragments containing #' do
         original_uri = URI('https://example.org/foo/bar')
         expect { URIs.append(original_uri, 'baz#qux', 'grault#plugh') }.to raise_error(URI::InvalidComponentError)
+        expect { URIs.append(original_uri, 'baz#qux#plugh') }.to raise_error(URI::InvalidComponentError)
       end
 
-      it 'rejects queries after fragments' do
+      # Per RFC3986, "3.5. Fragment"
+      it 'allows fragments containing ?' do
         original_uri = URI('https://example.org/foo/bar')
-        expect { URIs.append(original_uri, 'baz#qux', '?grault=plugh') }.to raise_error(URI::InvalidComponentError)
+        expected_url = "#{original_uri}/baz#qux?grault=plugh"
+        expected_uri = URI.parse(expected_url)
+
+        uri1 = URIs.append(original_uri, 'baz#qux', '?grault=plugh')
+        expect(uri1).to eq(expected_uri)
+
+        uri2 = URIs.append(original_uri, 'baz#qux?grault=plugh')
+        expect(uri2).to eq(expected_uri)
+      end
+
+      # Per RFC3986, "3.5. Fragment"
+      it 'allows fragments containing /' do
+        original_uri = URI('https://example.org/foo/bar')
+        expected_url = "#{original_uri}/baz#qux/grault=plugh"
+        expected_uri = URI.parse(expected_url)
+
+        uri1 = URIs.append(original_uri, 'baz#qux', '/grault=plugh')
+        expect(uri1).to eq(expected_uri)
+
+        uri2 = URIs.append(original_uri, 'baz#qux/grault=plugh')
+        expect(uri2).to eq(expected_uri)
       end
 
       it 'correctly handles fragments in mid-path-segment' do
@@ -155,6 +197,7 @@ module BerkeleyLibrary::Util
         expected_url = "#{original_uri}#{path}/plugh"
         expect(new_uri).to eq(URI(expected_url))
       end
+
     end
 
     describe 'requests' do

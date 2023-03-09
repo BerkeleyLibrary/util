@@ -2,6 +2,8 @@
 
 - Fix issue in `Requester` where query parameters would not be appended properly
   to URLs that already included a query string.
+- Fix issue in `URIs#append` (and `Appender`) where `?` would not be accepted in
+  query strings or fragments, contrary to RFC 3986 §3.
 - Fix documentation for `Arrays#find_indices`.
 
 # 0.1.5 (2022-09-16)
