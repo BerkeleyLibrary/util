@@ -115,7 +115,7 @@ module BerkeleyLibrary
 
       def should_escape?(b, mode)
         return false if unreserved?(b)
-        return false if ALLOWED_BYTES_BY_MODE[mode]&.include?(b)
+        return false if ALLOWED_BYTES_BY_MODE[mode].include?(b)
 
         true
       end
