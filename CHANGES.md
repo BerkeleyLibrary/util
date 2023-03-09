@@ -1,4 +1,4 @@
-# 0.1.6 (next)
+# 0.1.6 (2023-03-09)
 
 - Fix issue in `Requester` where query parameters would not be appended properly
   to URLs that already included a query string.
