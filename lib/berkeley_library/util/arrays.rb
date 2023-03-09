@@ -45,7 +45,7 @@ module BerkeleyLibrary
       # returns an array the length of the subset, containing for each element in
       # the subset the index of the corresponding element in the superset.
       #
-      # @overload find_matching_indices(for_array:, in_array:)
+      # @overload find_indices(for_array:, in_array:)
       #   For each value in `for_array`, finds the index of the first equal value
       #   in `in_array` after the previously matched value.
       #   @param in_array [Array] the list of values to look in
@@ -53,7 +53,7 @@ module BerkeleyLibrary
       #   @return [Array<Integer>, nil] the indices in `in_array` of each value in `for_array`,
       #     or `nil` if not all values could be found
       #
-      # @overload find_matching_indices(for_array:, in_array:)
+      # @overload find_indices(for_array:, in_array:)
       #   For each value in `for_array`, finds the index of the first value
       #   in `in_array` after the previously matched value that matches
       #   the specified match function.

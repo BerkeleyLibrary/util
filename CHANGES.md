@@ -2,6 +2,7 @@
 
 - Fix issue in `Requester` where query parameters would not be appended properly
   to URLs that already included a query string.
+- Fix documentation for `Arrays#find_indices`.
 
 # 0.1.5 (2022-09-16)
 
