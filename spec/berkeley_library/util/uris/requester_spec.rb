@@ -97,6 +97,17 @@ module BerkeleyLibrary
             expect(result).to eq(expected_status)
           end
 
+          it 'appends query parameters to URL with existing params' do
+            url = 'https://example.org/endpoint?foo=bar'
+            params = { p1: 1, p2: 2 }
+            url_with_query = "#{url}&#{URI.encode_www_form(params)}"
+            expected_status = 203
+            stub_request(:head, url_with_query).to_return(status: expected_status)
+
+            result = Requester.head(url, params: params)
+            expect(result).to eq(expected_status)
+          end
+
           it 'sends request headers' do
             url = 'https://example.org/'
             headers = { 'X-help' => 'I am trapped in a unit test' }
@@ -128,6 +139,10 @@ module BerkeleyLibrary
 
             result = Requester.head(url1)
             expect(result).to eq(expected_status)
+          end
+
+          it 'rejects a nil URI' do
+            expect { Requester.head(nil) }.to raise_error(ArgumentError)
           end
         end
       end

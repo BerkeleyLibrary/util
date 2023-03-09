@@ -68,14 +68,14 @@ module BerkeleyLibrary
             req_resp_or_raise(method, url_str, headers)
           end
 
-          def url_str_with_params(uri, params)
-            raise ArgumentError, 'uri cannot be nil' unless (url_str = Validator.url_str_or_nil(uri))
+          def url_str_with_params(url, params)
+            raise ArgumentError, 'url cannot be nil' unless (uri = Validator.uri_or_nil(url))
 
             elements = [].tap do |ee|
-              ee << url_str
+              ee << uri
               next if params.empty?
 
-              ee << '?' unless url_str.include?('?')
+              ee << (uri.query ? '&' : '?')
               ee << URI.encode_www_form(params)
             end
 

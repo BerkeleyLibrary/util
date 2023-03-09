@@ -1,3 +1,8 @@
+# 0.1.6 (next)
+
+- Fix issue in `Requester` where query parameters would not be appended properly
+  to URLs that already included a query string.
+
 # 0.1.5 (2022-09-16)
 
 - Adds `URIs#path_escape` to escape URL path segments
