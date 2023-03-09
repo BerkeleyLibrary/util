@@ -11,6 +11,7 @@
     <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
     <inspection_tool class="Rubocop" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="RubyCaseWithoutElseBlockInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RubyMismatchedArgumentType" enabled="true" level="INFORMATION" enabled_by_default="true" />
     <inspection_tool class="RubyMismatchedReturnType" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myCheckNilability" value="false" />
     </inspection_tool>
