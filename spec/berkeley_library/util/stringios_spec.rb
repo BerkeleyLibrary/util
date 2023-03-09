@@ -16,6 +16,13 @@ module BerkeleyLibrary
           end
         end
 
+        it 'reads from the end if given a negative index' do
+          bytes.reverse.each_with_index do |b, i|
+            end_offset = i + 1
+            expect(StringIOs.getbyte(sio, -end_offset)).to eq(b)
+          end
+        end
+
         it 'resets the current offset' do
           StringIOs.getbyte(sio, bytes.size / 2)
           expect(sio.pos).to eq(0)
