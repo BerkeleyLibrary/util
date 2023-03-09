@@ -25,7 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rest-client', '~> 2.1'
   spec.add_dependency 'typesafe_enum', '~> 0.3'
 
-  spec.add_development_dependency 'bundle-audit', '~> 0.1'
   spec.add_development_dependency 'ci_reporter_rspec', '~> 1.0'
   spec.add_development_dependency 'colorize', '~> 0.8'
   spec.add_development_dependency 'dotenv', '~> 2.7'
@@ -37,5 +36,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'ruby-prof', '~> 0.17.0'
   spec.add_development_dependency 'simplecov', '~> 0.21'
   spec.add_development_dependency 'webmock', '~> 3.12'
+
   spec.metadata['rubygems_mfa_required'] = 'true'
 end
