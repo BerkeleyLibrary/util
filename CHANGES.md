@@ -1,4 +1,4 @@
-# 0.1.7 (next)
+# 0.1.7 (2023-03-15)
 
 - Allow passing `log: false` to `Requester` methods (and corresponding `URIs` convenience
   methods) to suppress logging of each request URL and response code.
