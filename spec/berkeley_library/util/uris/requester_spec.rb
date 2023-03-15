@@ -145,6 +145,112 @@ module BerkeleyLibrary
             expect { Requester.head(nil) }.to raise_error(ArgumentError)
           end
         end
+
+        describe 'logging' do
+          attr_reader :logger
+
+          before do
+            @logger = instance_double(BerkeleyLibrary::Logging::Logger)
+            allow(BerkeleyLibrary::Logging).to receive(:logger).and_return(logger)
+          end
+
+          context 'GET' do
+            it 'logs request URLs and response codes for successful GET requests' do
+              url = 'https://example.org/'
+              expected_body = 'Help! I am trapped in a unit test'
+              stub_request(:get, url).to_return(body: expected_body)
+
+              expect(logger).to receive(:info).with(/#{url}.*200/)
+              Requester.send(:get, url)
+            end
+
+            it 'can suppress logging for successful GET requests' do
+              url = 'https://example.org/'
+              expected_body = 'Help! I am trapped in a unit test'
+              stub_request(:get, url).to_return(body: expected_body)
+
+              expect(logger).not_to receive(:info)
+              Requester.send(:get, url, log: false)
+            end
+
+            it 'logs request URLs and response codes for failed GET requests' do
+              url = 'https://example.org/'
+              status = 500
+              stub_request(:get, url).to_return(status: status)
+
+              expect(logger).to receive(:info).with(/#{url}.*#{status}/)
+              expect { Requester.send(:get, url) }.to raise_error(RestClient::InternalServerError)
+            end
+
+            it 'can suppress logging for failed GET requests' do
+              url = 'https://example.org/'
+              stub_request(:get, url).to_return(status: 500)
+
+              expect(logger).not_to receive(:info)
+              expect { Requester.send(:get, url, log: false) }.to raise_error(RestClient::InternalServerError)
+            end
+          end
+
+          context 'HEAD' do
+            it 'logs request URLs and response codes for successful HEAD requests' do
+              url = 'https://example.org/'
+              expected_body = 'Help! I am trapped in a unit test'
+              stub_request(:head, url).to_return(body: expected_body)
+
+              expect(logger).to receive(:info).with(/#{url}.*200/)
+              Requester.send(:head, url)
+            end
+
+            it 'can suppress logging for successful HEAD requests' do
+              url = 'https://example.org/'
+              expected_body = 'Help! I am trapped in a unit test'
+              stub_request(:head, url).to_return(body: expected_body)
+
+              expect(logger).not_to receive(:info)
+              Requester.send(:head, url, log: false)
+            end
+
+            it 'logs request URLs and response codes for failed HEAD requests' do
+              url = 'https://example.org/'
+              status = 500
+              stub_request(:head, url).to_return(status: status)
+
+              expect(logger).to receive(:info).with(/#{url}.*#{status}/)
+              expect(Requester.send(:head, url)).to eq(status)
+            end
+
+            it 'can suppress logging for failed HEAD requests' do
+              url = 'https://example.org/'
+              status = 500
+              stub_request(:head, url).to_return(status: status)
+
+              expect(logger).not_to receive(:info)
+              expect(Requester.send(:head, url, log: false)).to eq(status)
+            end
+          end
+        end
+
+        describe :new do
+          it 'rejects invalid URIs' do
+            url = 'not a uri'
+            Requester::SUPPORTED_METHODS.each do |method|
+              expect { Requester.new(method, url) }.to raise_error(URI::InvalidURIError)
+            end
+          end
+
+          it 'rejects nil URIs' do
+            Requester::SUPPORTED_METHODS.each do |method|
+              expect { Requester.new(method, nil) }.to raise_error(ArgumentError)
+            end
+          end
+
+          it 'rejects unsupported methods' do
+            url = 'https://example.org/'
+            %i[put patch post].each do |method|
+              expect { Requester.new(method, url) }.to raise_error(ArgumentError)
+            end
+          end
+        end
       end
     end
   end

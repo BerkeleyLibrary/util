@@ -31,10 +31,11 @@ module BerkeleyLibrary
       # @param uri [URI, String] the URI to GET
       # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
       # @param headers [Hash] the request headers.
+      # @param log [Boolean] whether to log each request URL and response code
       # @return [String] the body as a string.
       # @raise [RestClient::Exception] in the event of an unsuccessful request.
-      def get(uri, params: {}, headers: {})
-        Requester.get(uri, params: params, headers: headers)
+      def get(uri, params: {}, headers: {}, log: true)
+        Requester.get(uri, params: params, headers: headers, log: log)
       end
 
       # Performs a HEAD request and returns the response status as an integer.
@@ -44,9 +45,10 @@ module BerkeleyLibrary
       # @param uri [URI, String] the URI to HEAD
       # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
       # @param headers [Hash] the request headers.
+      # @param log [Boolean] whether to log each request URL and response code
       # @return [Integer] the response code as an integer.
-      def head(uri, params: {}, headers: {})
-        Requester.head(uri, params: params, headers: headers)
+      def head(uri, params: {}, headers: {}, log: true)
+        Requester.head(uri, params: params, headers: headers, log: log)
       end
 
       # Performs a GET request and returns the response, even in the event of
@@ -55,9 +57,10 @@ module BerkeleyLibrary
       # @param uri [URI, String] the URI to GET
       # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
       # @param headers [Hash] the request headers.
-      # @return [RestClient::Response] the body as a string.
-      def get_response(uri, params: {}, headers: {})
-        Requester.get_response(uri, params: params, headers: headers)
+      # @param log [Boolean] whether to log each request URL and response code
+      # @return [RestClient::Response] the response
+      def get_response(uri, params: {}, headers: {}, log: true)
+        Requester.get_response(uri, params: params, headers: headers, log: log)
       end
 
       # Performs a HEAD request and returns the response, even in the event of
@@ -66,9 +69,10 @@ module BerkeleyLibrary
       # @param uri [URI, String] the URI to HEAD
       # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
       # @param headers [Hash] the request headers.
-      # @return [RestClient::Response] the body as a string.
-      def head_response(uri, params: {}, headers: {})
-        Requester.head_response(uri, params: params, headers: headers)
+      # @param log [Boolean] whether to log each request URL and response code
+      # @return [RestClient::Response] the response
+      def head_response(uri, params: {}, headers: {}, log: true)
+        Requester.head_response(uri, params: params, headers: headers, log: log)
       end
 
       # Returns the specified URL as a URI, or `nil` if the URL is `nil`.

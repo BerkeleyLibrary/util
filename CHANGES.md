@@ -1,3 +1,10 @@
+# 0.1.7 (next)
+
+- Allow passing `log: false` to `Requester` methods (and corresponding `URIs` convenience
+  methods) to suppress logging of each request URL and response code.
+- Allow constructing `Requester` instances with delayed execution
+- Fix documentation for `get_response` and `head_response` in `URIs` and `Requester`
+
 # 0.1.6 (2023-03-09)
 
 - Fix issue in `Requester` where query parameters would not be appended properly

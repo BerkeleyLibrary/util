@@ -39,6 +39,14 @@ module BerkeleyLibrary
           end
         end
 
+        # Returns the new URI as a string.
+        #
+        # @return [String] a new URI appending the joined path elements, as a string.
+        # @raise URI::InvalidComponentError if appending the specified elements would create an invalid URI
+        def to_url_str
+          to_uri.to_s
+        end
+
         private
 
         def handle_element(element, elem_index)
