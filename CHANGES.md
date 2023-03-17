@@ -1,3 +1,7 @@
+# 0.1.8 (next)
+
+- Add `Retry-After` support to `Requester` for `429 Too Many Requests` and `503 Service Unavailable`. 
+
 # 0.1.7 (2023-03-15)
 
 - Allow passing `log: false` to `Requester` methods (and corresponding `URIs` convenience

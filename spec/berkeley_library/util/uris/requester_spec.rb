@@ -65,6 +65,250 @@ module BerkeleyLibrary
             result = Requester.get(url1)
             expect(result).to eq(expected_body)
           end
+
+          describe 'retries' do
+            let(:url) { 'https://example.org/' }
+            let(:expected_body) { 'Help! I am trapped in a unit test' }
+
+            context 'handling 429 Too Many Requests' do
+              context 'with Retry-After' do
+                context 'in seconds' do
+                  it 'retries after the specified delay' do
+                    retry_after_seconds = 1
+
+                    stub_request(:get, url)
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_seconds.to_s })
+                      .to_return(status: 200, body: expected_body)
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).to receive(:sleep).with(1).once
+
+                    result = requester.make_request
+                    expect(result).to eq(expected_body)
+                  end
+
+                  it 'handles a non-integer retry delay' do
+                    retry_after_seconds = 1.5
+                    stub_request(:get, url)
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_seconds.to_s })
+                      .to_return(status: 200, body: expected_body)
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).to receive(:sleep).with(2).once
+
+                    result = requester.make_request
+                    expect(result).to eq(expected_body)
+                  end
+
+                  it 'raises RetryDelayTooLarge if the delay is too large' do
+                    retry_after_seconds = 1 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
+
+                    stub_request(:get, url)
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_seconds.to_s })
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).not_to receive(:sleep)
+
+                    expect { requester.make_request }.to raise_error(RetryDelayTooLarge) do |ex|
+                      expect(ex.cause).to be_a(RestClient::TooManyRequests)
+                    end
+                  end
+
+                  it 'raises RetryLimitExceeded if there are too many retries' do
+                    retry_after_seconds = 1
+
+                    stub_request(:get, url)
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_seconds.to_s })
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_seconds.to_s })
+
+                    requester = Requester.new(:get, url, max_retries: 1)
+                    expect(requester).to receive(:sleep).with(1).once
+
+                    expect { requester.make_request }.to raise_error(RetryLimitExceeded) do |ex|
+                      expect(ex.cause).to be_a(RestClient::TooManyRequests)
+                    end
+                  end
+                end
+
+                context 'as RFC2822 datetime' do
+                  it 'retries after the specified delay' do
+                    retry_after_seconds = 1
+                    retry_after_datetime = (Time.now + retry_after_seconds)
+
+                    stub_request(:get, url)
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_datetime.rfc2822 })
+                      .to_return(status: 200, body: expected_body)
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).to receive(:sleep).with(1).once
+
+                    result = requester.make_request
+                    expect(result).to eq(expected_body)
+                  end
+
+                  it 'handles a non-integer retry delay' do
+                    retry_after_seconds = 2.75
+                    retry_after_datetime = (Time.now + retry_after_seconds)
+
+                    stub_request(:get, url)
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_datetime.rfc2822 })
+                      .to_return(status: 200, body: expected_body)
+
+                    requester = Requester.new(:get, url)
+                    expected_value = a_value_within(1).of(retry_after_seconds)
+                    expect(requester).to receive(:sleep).with(expected_value).once
+
+                    result = requester.make_request
+                    expect(result).to eq(expected_body)
+                  end
+
+                  it 'raises RetryDelayTooLarge if the delay is too large' do
+                    retry_after_seconds = 1 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
+                    retry_after_datetime = (Time.now + retry_after_seconds)
+
+                    stub_request(:get, url)
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_datetime.rfc2822 })
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).not_to receive(:sleep)
+
+                    expect { requester.make_request }.to raise_error(RetryDelayTooLarge) do |ex|
+                      expect(ex.cause).to be_a(RestClient::TooManyRequests)
+                    end
+                  end
+
+                  it 'raises RetryLimitExceeded if there are too many retries' do
+                    retry_after_seconds = 1
+                    retry_after_datetime = (Time.now + retry_after_seconds)
+
+                    stub_request(:get, url)
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_datetime.rfc2822 })
+                      .to_return(status: 429, headers: { 'Retry-After' => retry_after_datetime.rfc2822 })
+
+                    requester = Requester.new(:get, url, max_retries: 1)
+                    expect(requester).to receive(:sleep).with(1).once
+
+                    expect { requester.make_request }.to raise_error(RetryLimitExceeded) do |ex|
+                      expect(ex.cause).to be_a(RestClient::TooManyRequests)
+                    end
+                  end
+
+                end
+
+                it 'ignores an invalid Retry-After' do
+                  stub_request(:get, url)
+                    .to_return(status: 429, headers: { 'Retry-After' => 'the end of the world' })
+
+                  requester = Requester.new(:get, url)
+                  expect { requester.make_request }.to raise_error(RestClient::TooManyRequests)
+                end
+              end
+            end
+
+            context 'handling 503 Service Unavailable' do
+              context 'with Retry-After' do
+                context 'in seconds' do
+                  it 'retries after the specified delay' do
+                    retry_after_seconds = 1
+
+                    stub_request(:get, url)
+                      .to_return(status: 503, headers: { 'Retry-After' => retry_after_seconds.to_s })
+                      .to_return(status: 200, body: expected_body)
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).to receive(:sleep).with(1).once
+
+                    result = requester.make_request
+                    expect(result).to eq(expected_body)
+                  end
+
+                  it 'handles a non-integer retry delay' do
+                    retry_after_seconds = 0.75
+                    stub_request(:get, url)
+                      .to_return(status: 503, headers: { 'Retry-After' => retry_after_seconds.to_s })
+                      .to_return(status: 200, body: expected_body)
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).to receive(:sleep).with(1).once
+
+                    result = requester.make_request
+                    expect(result).to eq(expected_body)
+                  end
+
+                  it 'raises RetryDelayTooLarge if the delay is too large' do
+                    retry_after_seconds = 1 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
+
+                    stub_request(:get, url)
+                      .to_return(status: 503, headers: { 'Retry-After' => retry_after_seconds.to_s })
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).not_to receive(:sleep)
+
+                    expect { requester.make_request }.to raise_error(RetryDelayTooLarge) do |ex|
+                      expect(ex.cause).to be_a(RestClient::ServiceUnavailable)
+                    end
+                  end
+                end
+
+                context 'as RFC2822 datetime' do
+                  it 'retries after the specified delay' do
+                    retry_after_seconds = 1
+                    retry_after_datetime = (Time.now + retry_after_seconds)
+
+                    stub_request(:get, url)
+                      .to_return(status: 503, headers: { 'Retry-After' => retry_after_datetime.rfc2822 })
+                      .to_return(status: 200, body: expected_body)
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).to receive(:sleep).with(1).once
+
+                    result = requester.make_request
+                    expect(result).to eq(expected_body)
+                  end
+
+                  it 'handles a non-integer retry delay' do
+                    retry_after_seconds = 1.75
+                    retry_after_datetime = (Time.now + retry_after_seconds)
+
+                    stub_request(:get, url)
+                      .to_return(status: 503, headers: { 'Retry-After' => retry_after_datetime.rfc2822 })
+                      .to_return(status: 200, body: expected_body)
+
+                    requester = Requester.new(:get, url)
+                    expected_value = a_value_within(1).of(retry_after_seconds)
+                    expect(requester).to receive(:sleep).with(expected_value).once
+
+                    result = requester.make_request
+                    expect(result).to eq(expected_body)
+                  end
+
+                  it 'raises RetryDelayTooLarge if the delay is too large' do
+                    retry_after_seconds = 1 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
+                    retry_after_datetime = (Time.now + retry_after_seconds)
+
+                    stub_request(:get, url)
+                      .to_return(status: 503, headers: { 'Retry-After' => retry_after_datetime.rfc2822 })
+
+                    requester = Requester.new(:get, url)
+                    expect(requester).not_to receive(:sleep)
+
+                    expect { requester.make_request }.to raise_error(RetryDelayTooLarge) do |ex|
+                      expect(ex.cause).to be_a(RestClient::ServiceUnavailable)
+                    end
+                  end
+                end
+
+                it 'ignores an invalid Retry-After' do
+                  stub_request(:get, url)
+                    .to_return(status: 503, headers: { 'Retry-After' => 'the end of the world' })
+
+                  requester = Requester.new(:get, url)
+                  expect { requester.make_request }.to raise_error(RestClient::ServiceUnavailable)
+                end
+              end
+            end
+          end
+
         end
 
         describe :head do

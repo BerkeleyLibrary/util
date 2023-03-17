@@ -1,6 +1,9 @@
+require 'time'
 require 'rest-client'
 require 'berkeley_library/util/uris/appender'
+require 'berkeley_library/util/uris/exceptions'
 require 'berkeley_library/util/uris/validator'
+require 'berkeley_library/util/uris/requester/class_methods'
 require 'berkeley_library/logging'
 
 module BerkeleyLibrary
@@ -10,79 +13,18 @@ module BerkeleyLibrary
         include BerkeleyLibrary::Logging
 
         # ------------------------------------------------------------
-        # Class methods
-
-        class << self
-          # Performs a GET request and returns the response body as a string.
-          #
-          # @param uri [URI, String] the URI to GET
-          # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
-          # @param headers [Hash] the request headers.
-          # @return [String] the body as a string.
-          # @param log [Boolean] whether to log each request URL and response code
-          # @raise [RestClient::Exception] in the event of an unsuccessful request.
-          def get(uri, params: {}, headers: {}, log: true)
-            resp = make_request(:get, uri, params, headers, log)
-            resp.body
-          end
-
-          # Performs a HEAD request and returns the response status as an integer.
-          # Note that unlike {Requester#get}, this does not raise an error in the
-          # event of an unsuccessful request.
-          #
-          # @param uri [URI, String] the URI to HEAD
-          # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
-          # @param headers [Hash] the request headers.
-          # @param log [Boolean] whether to log each request URL and response code
-          # @return [Integer] the response code as an integer.
-          def head(uri, params: {}, headers: {}, log: true)
-            head_response(uri, params: params, headers: headers, log: log).code
-          end
-
-          # Performs a GET request and returns the response, even in the event of
-          # a failed request.
-          #
-          # @param uri [URI, String] the URI to GET
-          # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
-          # @param headers [Hash] the request headers.
-          # @param log [Boolean] whether to log each request URL and response code
-          # @return [RestClient::Response] the body as a string.
-          def get_response(uri, params: {}, headers: {}, log: true)
-            make_request(:get, uri, params, headers, log)
-          rescue RestClient::Exception => e
-            e.response
-          end
-
-          # Performs a HEAD request and returns the response, even in the event of
-          # a failed request.
-          #
-          # @param uri [URI, String] the URI to HEAD
-          # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
-          # @param headers [Hash] the request headers.
-          # @param log [Boolean] whether to log each request URL and response code
-          # @return [RestClient::Response] the response
-          def head_response(uri, params: {}, headers: {}, log: true)
-            make_request(:head, uri, params, headers, log)
-          rescue RestClient::Exception => e
-            e.response
-          end
-
-          private
-
-          def make_request(method, url, params, headers, log)
-            Requester.new(method, url, params: params, headers: headers, log: log).make_request
-          end
-        end
-
-        # ------------------------------------------------------------
         # Constants
 
         SUPPORTED_METHODS = %i[get head].freeze
+        RETRY_HEADER = :retry_after
+        RETRY_STATUSES = [429, 503].freeze
+        MAX_RETRY_DELAY_SECONDS = 10
+        MAX_RETRIES = 3
 
         # ------------------------------------------------------------
         # Attributes
 
-        attr_reader :method, :url_str, :headers, :log
+        attr_reader :method, :url_str, :headers, :log, :max_retries, :max_retry_delay
 
         # ------------------------------------------------------------
         # Initializer
@@ -94,8 +36,11 @@ module BerkeleyLibrary
         # @param params [Hash] the query parameters to add to the URI. (Note that the URI may already include query parameters.)
         # @param headers [Hash] the request headers.
         # @param log [Boolean] whether to log each request URL and response code
+        # @param max_retries [Integer] the maximum number of times to retry after a 429 or 503 with Retry-After
+        # @param max_retry_delay [Integer] the maximum retry delay (in seconds) to accept in a Retry-After header
         # @raise URI::InvalidURIError if the specified URL is invalid
-        def initialize(method, url, params: {}, headers: {}, log: true)
+        # rubocop:disable Metrics/ParameterLists
+        def initialize(method, url, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS)
           raise ArgumentError, "#{method} not supported" unless SUPPORTED_METHODS.include?(method)
           raise ArgumentError, 'url cannot be nil' unless (uri = Validator.uri_or_nil(url))
 
@@ -103,7 +48,11 @@ module BerkeleyLibrary
           @url_str = url_str_with_params(uri, params)
           @headers = headers
           @log = log
+          @max_retries = max_retries
+          @max_retry_delay = max_retry_delay
         end
+
+        # rubocop:enable Metrics/ParameterLists
 
         # ------------------------------------------------------------
         # Public instance methods
@@ -139,11 +88,28 @@ module BerkeleyLibrary
           Appender.new(*elements).to_url_str
         end
 
-        def execute_request
+        def execute_request(retries_remaining = max_retries)
+          try_execute_request
+        rescue RestClient::Exception => e
+          response = e.response
+          raise unless (retry_delay = retry_delay_from(response))
+
+          wait_for_retry(response, retry_delay, retries_remaining)
+          execute_request(retries_remaining - 1)
+        end
+
+        def try_execute_request
           RestClient::Request.execute(method: method, url: url_str, headers: headers).tap do |response|
             # Not all failed RestClient requests throw exceptions
             raise(exception_for(response)) unless response.code == 200
           end
+        end
+
+        def wait_for_retry(response, retry_delay, retries_remaining)
+          raise RetryLimitExceeded.new(response, max_retries: max_retries) unless retries_remaining > 0
+          raise RetryDelayTooLarge.new(response, delay: retry_delay, max_delay: max_retry_delay) if retry_delay > max_retry_delay
+
+          sleep(retry_delay)
         end
 
         def exception_for(resp)
@@ -156,6 +122,43 @@ module BerkeleyLibrary
 
         def ex_class_for(status)
           RestClient::Exceptions::EXCEPTIONS_MAP[status] || RestClient::RequestFailed
+        end
+
+        # Returns the retry interval for the specified exception, or `nil`
+        # if the response does not allow a retry.
+        #
+        # @param resp [RestClient::Response] the response
+        # @return [Integer, nil] the retry delay in seconds, or `nil` if the response
+        #         does not allow a retry
+        def retry_delay_from(resp)
+          return unless RETRY_STATUSES.include?(resp.code)
+          return unless (retry_header_value = resp.headers[RETRY_HEADER])
+          return unless (retry_delay_seconds = parse_retry_header_value(retry_header_value))
+
+          [1, retry_delay_seconds.ceil].max
+        end
+
+        # @return [Float, nil] the retry delay in seconds, or `nil` if the delay cannot be parsed
+        def parse_retry_header_value(v)
+          # start by assuming it's a delay in seconds
+          Float(v) # should be an integer but let's not count on it
+        rescue ArgumentError
+          # assume it's an HTTP-date
+          parse_retry_after_date(v)
+        end
+
+        # Parses the specified RFC2822 datetime string and returns the interval between that
+        # datetime and the current time in seconds
+        #
+        # @param date_str [String] an RFC2822 datetime string
+        # @return [Float, nil] the interval between the current time and the specified datetime,
+        #   or nil if `date_str` cannot be parsed
+        def parse_retry_after_date(date_str)
+          retry_after = DateTime.rfc2822(date_str).to_time
+          retry_after - Time.now
+        rescue ArgumentError
+          logger.warn("Can't parse #{RETRY_HEADER} value #{date_str}")
+          nil
         end
 
       end
