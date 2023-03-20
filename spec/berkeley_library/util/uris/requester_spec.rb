@@ -101,7 +101,7 @@ module BerkeleyLibrary
                   end
 
                   it 'raises RetryDelayTooLarge if the delay is too large' do
-                    retry_after_seconds = 1 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
+                    retry_after_seconds = 10 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
 
                     stub_request(:get, url)
                       .to_return(status: 429, headers: { 'Retry-After' => retry_after_seconds.to_s })
@@ -163,7 +163,7 @@ module BerkeleyLibrary
                   end
 
                   it 'raises RetryDelayTooLarge if the delay is too large' do
-                    retry_after_seconds = 1 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
+                    retry_after_seconds = 10 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
                     retry_after_datetime = (Time.now + retry_after_seconds)
 
                     stub_request(:get, url)
@@ -236,7 +236,7 @@ module BerkeleyLibrary
                   end
 
                   it 'raises RetryDelayTooLarge if the delay is too large' do
-                    retry_after_seconds = 1 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
+                    retry_after_seconds = 10 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
 
                     stub_request(:get, url)
                       .to_return(status: 503, headers: { 'Retry-After' => retry_after_seconds.to_s })
@@ -283,7 +283,7 @@ module BerkeleyLibrary
                   end
 
                   it 'raises RetryDelayTooLarge if the delay is too large' do
-                    retry_after_seconds = 1 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
+                    retry_after_seconds = 10 + BerkeleyLibrary::Util::URIs::Requester::MAX_RETRY_DELAY_SECONDS
                     retry_after_datetime = (Time.now + retry_after_seconds)
 
                     stub_request(:get, url)
