@@ -1,4 +1,4 @@
-# 0.1.8 (next)
+# 0.1.8 (2023-03-20)
 
 - Add `Retry-After` support to `Requester` for `429 Too Many Requests` and `503 Service Unavailable`. 
 

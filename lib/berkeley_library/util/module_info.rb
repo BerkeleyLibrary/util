@@ -7,7 +7,7 @@ module BerkeleyLibrary
       SUMMARY = 'Miscellaneous Ruby utilities for the UC Berkeley Library'.freeze
       DESCRIPTION = 'A collection of miscellaneous Ruby routines for the UC Berkeley Library.'.freeze
       LICENSE = 'MIT'.freeze
-      VERSION = '0.1.7'.freeze
+      VERSION = '0.1.8'.freeze
       HOMEPAGE = 'https://github.com/BerkeleyLibrary/util'.freeze
     end
   end
