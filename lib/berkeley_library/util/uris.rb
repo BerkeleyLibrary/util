@@ -88,8 +88,8 @@ module BerkeleyLibrary
       # replacing disallowed characters (including /) with percent-encodings as needed.
       def path_escape(s)
         raise ArgumentError, "Can't escape #{s.inspect}: not a string" unless s.respond_to?(:encoding)
-        raise ArgumentError, "Can't escape #{s.inspect}: expected #{UTF_8}, was #{s.encoding}" unless s.encoding == UTF_8
 
+        s = s.encode(UTF_8) unless s.encoding == UTF_8
         ''.tap do |escaped|
           s.bytes.each do |b|
             escaped << (should_escape?(b, :path_segment) ? '%%%02X' % b : b.chr)

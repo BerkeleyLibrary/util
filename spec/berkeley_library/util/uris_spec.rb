@@ -337,20 +337,14 @@ module BerkeleyLibrary::Util
         expect { URIs.path_escape(str.bytes) }.to raise_error(ArgumentError)
       end
 
-      it 'rejects non-UTF-8 strings' do
-        str = in_out.keys.last
-        expect { URIs.path_escape(str.encode(Encoding::Shift_JIS)) }.to raise_error(ArgumentError)
-      end
-
-      it 'accepts non-UTF-8 strings converted to UTF-8' do
-        in_str = in_out.keys.last
-        out_str = in_out[in_str]
-
-        # OK, we're really just testing String#encode here, but
-        # it's useful for documentation
-        in_str_sjis = in_str.encode(Encoding::Shift_JIS)
-        in_str_utf8 = in_str_sjis.encode(Encoding::UTF_8)
-        expect(URIs.path_escape(in_str_utf8)).to eq(out_str)
+      it 'converts non-UTF-8 strings to UTF-8' do
+        utf_16_be = Encoding.find('UTF-16BE')
+        aggregate_failures do
+          in_out.each do |in_str, out_str|
+            encoded = in_str.encode(utf_16_be)
+            expect(URIs.path_escape(encoded)).to eq(out_str)
+          end
+        end
       end
     end
   end
