@@ -1,3 +1,8 @@
+# 0.1.9 (2023-06-01)
+
+- `URIs#path_escape` now attempts to convert non-UTF-8 strings to UTF-8 rather than immediately
+  raising an error.
+
 # 0.1.8 (2023-03-20)
 
 - Add `Retry-After` support to `Requester` for `429 Too Many Requests` and `503 Service Unavailable`. 
