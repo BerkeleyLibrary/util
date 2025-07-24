@@ -8,8 +8,8 @@ require 'berkeley_library/util/module_info'
 
 Gem::Specification.new do |spec|
   spec.name = BerkeleyLibrary::Util::ModuleInfo::NAME
-  spec.author = BerkeleyLibrary::Util::ModuleInfo::AUTHOR
-  spec.email = BerkeleyLibrary::Util::ModuleInfo::AUTHOR_EMAIL
+  spec.author = BerkeleyLibrary::Util::ModuleInfo::AUTHORS
+  spec.email = BerkeleyLibrary::Util::ModuleInfo::AUTHOR_EMAILS
   spec.summary = BerkeleyLibrary::Util::ModuleInfo::SUMMARY
   spec.description = BerkeleyLibrary::Util::ModuleInfo::DESCRIPTION
   spec.license = BerkeleyLibrary::Util::ModuleInfo::LICENSE
