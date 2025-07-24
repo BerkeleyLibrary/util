@@ -3,9 +3,6 @@ services:
     build:
       context: .
       target: development
-    ports:
-      - target: 3000
-        published: 3000
     restart: always
     volumes:
       # Note that this mounts the *entire* repo directory (including
