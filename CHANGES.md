@@ -1,3 +1,8 @@
+# 0.2.0 (2025-07-24)
+
+- Update to support Ruby 3.3+.
+- Update Rubocop & style changes.
+
 # 0.1.9 (2023-06-01)
 
 - `URIs#path_escape` now attempts to convert non-UTF-8 strings to UTF-8 rather than immediately
