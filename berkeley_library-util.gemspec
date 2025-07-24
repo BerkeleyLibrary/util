@@ -2,7 +2,7 @@ File.expand_path('lib', __dir__).tap do |lib|
   $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 end
 
-ruby_version = '>= 2.7'
+ruby_version = '~> 3.3'
 
 require 'berkeley_library/util/module_info'
 
@@ -21,19 +21,19 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ruby_version
 
-  spec.add_dependency 'berkeley_library-logging', '~> 0.2'
+  spec.add_dependency 'berkeley_library-logging', '~> 0.3'
   spec.add_dependency 'rest-client', '~> 2.1'
   spec.add_dependency 'typesafe_enum', '~> 0.3'
 
   spec.add_development_dependency 'ci_reporter_rspec', '~> 1.0'
-  spec.add_development_dependency 'colorize', '~> 0.8'
+  spec.add_development_dependency 'colorize', '~> 1.0'
   spec.add_development_dependency 'dotenv', '~> 2.7'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.10'
-  spec.add_development_dependency 'rubocop', '= 1.39'
-  spec.add_development_dependency 'rubocop-rake', '= 0.6.0'
-  spec.add_development_dependency 'rubocop-rspec', '= 2.4.0'
-  spec.add_development_dependency 'ruby-prof', '~> 0.17.0'
+  spec.add_development_dependency 'rubocop', '~> 1.78.0'
+  spec.add_development_dependency 'rubocop-rake', '~> 0.7.1'
+  spec.add_development_dependency 'rubocop-rspec', '~> 3.6.0'
+  spec.add_development_dependency 'ruby-prof'
   spec.add_development_dependency 'simplecov', '~> 0.21'
   spec.add_development_dependency 'webmock', '~> 3.12'
 
