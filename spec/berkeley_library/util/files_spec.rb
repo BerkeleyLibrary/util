@@ -14,42 +14,42 @@ module BerkeleyLibrary
       describe :file_exists? do
         it 'returns true for files that exist' do
           path = Pathname.new(tmpdir).join('exists').tap { |p| FileUtils.touch(p) }
-          expect(path.exist?).to eq(true) # just to be sure
+          expect(path.exist?).to be(true) # just to be sure
           path_str = path.to_s
 
-          expect(Files.file_exists?(path)).to eq(true)
-          expect(Files.file_exists?(path_str)).to eq(true)
+          expect(Files.file_exists?(path)).to be(true)
+          expect(Files.file_exists?(path_str)).to be(true)
         end
 
         it 'returns false for files that do not exist' do
           path = Pathname.new(tmpdir).join('not-exists')
-          expect(path.exist?).to eq(false) # just to be sure
+          expect(path.exist?).to be(false) # just to be sure
           path_str = path.to_s
 
-          expect(Files.file_exists?(path)).to eq(false)
-          expect(Files.file_exists?(path_str)).to eq(false)
+          expect(Files.file_exists?(path)).to be(false)
+          expect(Files.file_exists?(path_str)).to be(false)
         end
       end
 
       describe :parent_exists? do
         it 'returns true for paths whose parent exists' do
           parent = Pathname.new(tmpdir).join('parent').tap(&:mkdir)
-          expect(parent.exist?).to eq(true) # just to be sure
+          expect(parent.exist?).to be(true) # just to be sure
           path = parent.join('child')
           path_str = path.to_s
 
-          expect(Files.parent_exists?(path)).to eq(true)
-          expect(Files.parent_exists?(path_str)).to eq(true)
+          expect(Files.parent_exists?(path)).to be(true)
+          expect(Files.parent_exists?(path_str)).to be(true)
         end
 
         it 'returns false for paths whose parent does not' do
           parent = Pathname.new(tmpdir).join('parent')
-          expect(parent.exist?).to eq(false) # just to be sure
+          expect(parent.exist?).to be(false) # just to be sure
           path = parent.join('child')
           path_str = path.to_s
 
-          expect(Files.parent_exists?(path)).to eq(false)
-          expect(Files.parent_exists?(path_str)).to eq(false)
+          expect(Files.parent_exists?(path)).to be(false)
+          expect(Files.parent_exists?(path_str)).to be(false)
         end
       end
 
@@ -59,19 +59,19 @@ module BerkeleyLibrary
           FileUtils.touch(filename)
 
           File.open(filename, 'rb') do |out|
-            expect(Files.reader_like?(out)).to eq(true)
+            expect(Files.reader_like?(out)).to be(true)
           end
         end
 
         it 'returns true for a StringIO' do
           out = StringIO.new
-          expect(Files.reader_like?(out)).to eq(true)
+          expect(Files.reader_like?(out)).to be(true)
         end
 
         it 'returns true for a Tempfile' do
           out = Tempfile.new('out')
           begin
-            expect(Files.reader_like?(out)).to eq(true)
+            expect(Files.reader_like?(out)).to be(true)
           ensure
             out.close
             out.unlink
@@ -79,7 +79,7 @@ module BerkeleyLibrary
         end
 
         it 'returns false for something that is not reader-like' do
-          expect(Files.reader_like?('not an IO')).to eq(false)
+          expect(Files.reader_like?('not an IO')).to be(false)
         end
       end
 
@@ -88,19 +88,19 @@ module BerkeleyLibrary
           filename = File.join(tmpdir, 'out')
 
           File.open(filename, 'wb') do |out|
-            expect(Files.writer_like?(out)).to eq(true)
+            expect(Files.writer_like?(out)).to be(true)
           end
         end
 
         it 'returns true for a StringIO' do
           out = StringIO.new
-          expect(Files.writer_like?(out)).to eq(true)
+          expect(Files.writer_like?(out)).to be(true)
         end
 
         it 'returns true for a Tempfile' do
           out = Tempfile.new('out')
           begin
-            expect(Files.writer_like?(out)).to eq(true)
+            expect(Files.writer_like?(out)).to be(true)
           ensure
             out.close
             out.unlink
@@ -108,7 +108,7 @@ module BerkeleyLibrary
         end
 
         it 'returns false for something that is not writer-like' do
-          expect(Files.writer_like?('not an IO')).to eq(false)
+          expect(Files.writer_like?('not an IO')).to be(false)
         end
       end
     end

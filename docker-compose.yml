@@ -1,0 +1,10 @@
+services:
+  gem:
+    build:
+      context: .
+      target: development
+    restart: always
+    volumes:
+      # Note that this mounts the *entire* repo directory (including
+      # files ignored in .dockerignore when building the image)
+      - ./:/opt/app

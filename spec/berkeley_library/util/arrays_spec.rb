@@ -8,11 +8,11 @@ module BerkeleyLibrary::Util
       let(:sup) { %w[a b c d e] }
 
       it 'returns true for an identical subset' do
-        expect(Arrays.ordered_superset?(superset: sup, subset: sup.dup)).to eq(true)
+        expect(Arrays.ordered_superset?(superset: sup, subset: sup.dup)).to be(true)
       end
 
       it 'returns true for an empty subset' do
-        expect(Arrays.ordered_superset?(superset: sup, subset: [])).to eq(true)
+        expect(Arrays.ordered_superset?(superset: sup, subset: [])).to be(true)
       end
 
       it 'returns true for an exact sublist' do
@@ -22,7 +22,7 @@ module BerkeleyLibrary::Util
           %w[c d e]
         ]
         subs.each do |sub|
-          expect(Arrays.ordered_superset?(superset: sup, subset: sub)).to eq(true)
+          expect(Arrays.ordered_superset?(superset: sup, subset: sub)).to be(true)
         end
       end
 
@@ -33,13 +33,13 @@ module BerkeleyLibrary::Util
           %w[a b d e]
         ]
         subs.each do |sub|
-          expect(Arrays.ordered_superset?(superset: sup, subset: sub)).to eq(true)
+          expect(Arrays.ordered_superset?(superset: sup, subset: sub)).to be(true)
         end
       end
 
       it 'returns false for a too-large subset' do
         sub = %w[a b c d e f g]
-        expect(Arrays.ordered_superset?(superset: sup, subset: sub)).to eq(false)
+        expect(Arrays.ordered_superset?(superset: sup, subset: sub)).to be(false)
       end
 
       it 'returns false when extra elements are present' do
@@ -49,7 +49,7 @@ module BerkeleyLibrary::Util
           %w[c d x e]
         ]
         subs.each do |sub|
-          expect(Arrays.ordered_superset?(superset: sup, subset: sub)).to eq(false)
+          expect(Arrays.ordered_superset?(superset: sup, subset: sub)).to be(false)
         end
       end
     end
@@ -150,7 +150,6 @@ module BerkeleyLibrary::Util
         expect { Arrays.find_index(1, 2, 3, in_array: [1, 2, 3]) }.to raise_error(ArgumentError)
       end
 
-      # rubocop:disable Lint/Void
       it 'returns an enumerator if given no arguments' do
         e = Arrays.find_index(in_array: arr)
         expect(e.each { |x| x > 3 }).to eq(2)
@@ -158,7 +157,6 @@ module BerkeleyLibrary::Util
         e = Arrays.find_index(in_array: arr, start_index: 3)
         expect(e.each { |x| x < 5 }).to eq(4)
       end
-      # rubocop:enable Lint/Void
     end
 
     describe :merge do
@@ -181,7 +179,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = [1, 2, 2, 3, 4, 4, 5, 5, 6]
@@ -195,7 +193,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = [1, 2, 3, 4, 5, 7, 8, 9]
@@ -209,7 +207,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = [1, 2, 3, 2, 2, 4]
@@ -223,7 +221,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = [1, nil, 3, nil, nil, 4]
@@ -237,7 +235,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = [1, 'two', 3, 'two', 'two', 4]
@@ -251,7 +249,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = a2
@@ -267,7 +265,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = [1, 2, 3, 4, 5, 6, 9]
@@ -283,7 +281,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = [1, 6, 9, 2, 3, 4, 5]
@@ -299,7 +297,7 @@ module BerkeleyLibrary::Util
 
         merged = Arrays.merge(a1, a2)
         [a1, a2].each do |a|
-          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+          expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
         end
 
         expected = [1, 2, 3, 4, 5, 6, 9]
@@ -319,7 +317,7 @@ module BerkeleyLibrary::Util
 
             merged = Arrays.merge(a1, a2)
             [a1, a2].each do |a|
-              expect(Arrays.ordered_superset?(superset: merged, subset: a)).to eq(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
+              expect(Arrays.ordered_superset?(superset: merged, subset: a)).to be(true), "merge(#{[a1.join, a2.join].inspect}): #{a.join} not found in #{merged.join}"
             end
           end
         end

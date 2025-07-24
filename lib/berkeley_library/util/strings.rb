@@ -8,7 +8,7 @@ module BerkeleyLibrary
       def ascii_numeric?(s)
         s.chars.all? do |c|
           ord = c.ord
-          ord >= ASCII_0 && ord <= ASCII_9
+          ord.between?(ASCII_0, ASCII_9)
         end
       end
 
