@@ -6,7 +6,7 @@ module BerkeleyLibrary
       describe :ascii_numeric do
         it 'returns true for ASCII numeric strings' do
           str = '8675309'
-          expect(Strings.ascii_numeric?(str)).to eq(true)
+          expect(Strings.ascii_numeric?(str)).to be(true)
         end
 
         it 'returns false for non-ASCII numeric strings' do
@@ -16,7 +16,7 @@ module BerkeleyLibrary
           ]
           aggregate_failures 'non-ASCII numeric strings' do
             strs.each do |str|
-              expect(Strings.ascii_numeric?(str)).to eq(false), "Expected #{str.inspect} to be non-ASCII-numeric"
+              expect(Strings.ascii_numeric?(str)).to be(false), "Expected #{str.inspect} to be non-ASCII-numeric"
             end
           end
         end
@@ -29,7 +29,7 @@ module BerkeleyLibrary
           ]
           aggregate_failures 'ASCII mixed numeric and non-numeric strings' do
             strs.each do |str|
-              expect(Strings.ascii_numeric?(str)).to eq(false), "Expected #{str.inspect} to be non-ASCII-numeric"
+              expect(Strings.ascii_numeric?(str)).to be(false), "Expected #{str.inspect} to be non-ASCII-numeric"
             end
           end
         end

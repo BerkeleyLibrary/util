@@ -142,7 +142,7 @@ module BerkeleyLibrary
           shorter_unmatched = shorter[0...ix_s]
           longer_unmatched = longer[0...ix_l]
           all_unmatched = sort_by_first_and_flatten(shorter_unmatched, longer_unmatched)
-          return (all_unmatched << v) + merge(shorter[ix_s + 1..], longer[ix_l + 1..])
+          return (all_unmatched << v) + merge(shorter[(ix_s + 1)..], longer[(ix_l + 1)..])
         end
 
         sort_by_first_and_flatten(longer, shorter)

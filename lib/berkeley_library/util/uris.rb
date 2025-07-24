@@ -109,13 +109,13 @@ module BerkeleyLibrary
         nil
       end
 
-      private
-
       # TODO: extend to cover other modes - host, zone, path, password, query, fragment
       #       cf. https://github.com/golang/go/blob/master/src/net/url/url.go
       ALLOWED_BYTES_BY_MODE = {
         path_segment: [0x24, 0x26, 0x2b, 0x3a, 0x3d, 0x40] # @ & = + $
       }.freeze
+
+      private
 
       def should_escape?(b, mode)
         return false if unreserved?(b)
@@ -124,16 +124,14 @@ module BerkeleyLibrary
         true
       end
 
-      # rubocop:disable Metrics/CyclomaticComplexity
       def unreserved?(byte)
-        return true if byte >= 0x41 && byte <= 0x5a # A-Z
-        return true if byte >= 0x61 && byte <= 0x7a # a-z
-        return true if byte >= 0x30 && byte <= 0x39 # 0-9
+        return true if byte.between?(0x41, 0x5a) # A-Z
+        return true if byte.between?(0x61, 0x7a) # a-z
+        return true if byte.between?(0x30, 0x39) # 0-9
         return true if [0x2d, 0x2e, 0x5f, 0x7e].include?(byte) # - . _ ~
 
         false
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
     end
   end
 end
