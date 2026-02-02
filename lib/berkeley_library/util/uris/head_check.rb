@@ -7,17 +7,6 @@ module BerkeleyLibrary
       class HeadCheck < ::OkComputer::HttpCheck
 
         def perform_request
-          # original HttpCheck::perform_request uses open-uri to perform a GET request.
-          # Timeout.timeout(request_timeout) do
-          #   options = { read_timeout: request_timeout }
-
-          #   if basic_auth_options.any?
-          #     options[:http_basic_authentication] = basic_auth_options
-          #   end
-
-          #   url.read(options)
-          # end
-
           headers = {}
           if basic_auth_options.any?
             user, password = basic_auth_options
