@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'ci_reporter_rspec', '~> 1.0'
   spec.add_development_dependency 'colorize', '~> 1.0'
   spec.add_development_dependency 'dotenv', '~> 2.7'
+  spec.add_development_dependency 'okcomputer', '~> 1.19'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.10'
   spec.add_development_dependency 'rubocop', '~> 1.78.0'
