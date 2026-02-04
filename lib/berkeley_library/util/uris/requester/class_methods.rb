@@ -48,9 +48,7 @@ module BerkeleyLibrary
                            timeout: DEFAULT_TIMEOUT_SECONDS)
             make_request(:get, uri, params, headers, log, max_retries, max_retry_delay, timeout)
           rescue RestClient::Exception => e
-            return e.response if e.response
-
-            raise
+            e.response
           end
 
           # Performs a HEAD request and returns the response, even in the event of

@@ -1,7 +1,8 @@
-# 0.2.1 (2026-02-02)
+# 0.2.1 (2026-02-04)
 
 - Add `URIs::HeadCheck`, an OkComputer check that performs a HEAD request
   to verify the availability of a URL, with optional basic authentication.
+- updates Requester to support timeouts values passed to RestClient
 
 # 0.2.0 (2025-07-24)
 
