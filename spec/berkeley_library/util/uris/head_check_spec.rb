@@ -23,7 +23,7 @@ module BerkeleyLibrary
 
           it 'calls URIs.head_response with the correct URL' do
             check.perform_request
-            expect(BerkeleyLibrary::Util::URIs).to have_received(:head_response).with(URI(url), headers: {}, log: false)
+            expect(BerkeleyLibrary::Util::URIs).to have_received(:head_response).with(URI(url), headers: {}, log: false, timeout: 5)
           end
         end
 
@@ -40,7 +40,7 @@ module BerkeleyLibrary
             expected_headers = { 'Authorization' => "Basic #{Base64.strict_encode64("#{user}:#{password}")}" }
 
             check.perform_request
-            expect(BerkeleyLibrary::Util::URIs).to have_received(:head_response).with(URI(url), headers: expected_headers, log: false)
+            expect(BerkeleyLibrary::Util::URIs).to have_received(:head_response).with(URI(url), headers: expected_headers, log: false, timeout: 5)
           end
         end
 

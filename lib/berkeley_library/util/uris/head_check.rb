@@ -13,9 +13,12 @@ module BerkeleyLibrary
             headers['Authorization'] = "Basic #{Base64.strict_encode64("#{user}:#{password}")}"
           end
 
-          URIs.head_response(url, headers: headers, log: false)
+          options = { headers: headers, log: false }
+          options[:timeout] = request_timeout.to_i if request_timeout
+
+          URIs.head_response(url, **options)
         rescue StandardError => e
-          raise OkComputer::HttpCheck::ConnectionFailed, e.message
+          raise OkComputer::HttpCheck::ConnectionFailed, e
         end
       end
     end

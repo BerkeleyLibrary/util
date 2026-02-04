@@ -305,6 +305,13 @@ module BerkeleyLibrary
                   requester = Requester.new(:get, url)
                   expect { requester.make_request }.to raise_error(RestClient::ServiceUnavailable)
                 end
+
+                it "raises #{RestClient::Exceptions::Timeout} when the request times out" do
+                  url = 'http://example.edu/timeout'
+                  stub_request(:get, url).to_raise(RestClient::Exceptions::Timeout)
+
+                  expect { Requester.get(url, timeout: 10) }.to raise_error(RestClient::Exceptions::Timeout)
+                end
               end
             end
           end
@@ -372,6 +379,13 @@ module BerkeleyLibrary
                 expect(result).to eq(expected_status)
               end
             end
+          end
+
+          it "raises #{RestClient::Exceptions::Timeout} when the request times out" do
+            url = 'http://example.edu/timeout'
+            stub_request(:head, url).to_raise(RestClient::Exceptions::Timeout)
+
+            expect { Requester.head(url, timeout: 10) }.to raise_error(RestClient::Exceptions::Timeout)
           end
 
           it 'handles redirects' do

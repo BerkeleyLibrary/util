@@ -20,11 +20,12 @@ module BerkeleyLibrary
         RETRY_STATUSES = [429, 503].freeze
         MAX_RETRY_DELAY_SECONDS = 10
         MAX_RETRIES = 3
+        DEFAULT_TIMEOUT_SECONDS = 10
 
         # ------------------------------------------------------------
         # Attributes
 
-        attr_reader :method, :url_str, :headers, :log, :max_retries, :max_retry_delay
+        attr_reader :method, :url_str, :headers, :log, :max_retries, :max_retry_delay, :timeout
 
         # ------------------------------------------------------------
         # Initializer
@@ -38,9 +39,11 @@ module BerkeleyLibrary
         # @param log [Boolean] whether to log each request URL and response code
         # @param max_retries [Integer] the maximum number of times to retry after a 429 or 503 with Retry-After
         # @param max_retry_delay [Integer] the maximum retry delay (in seconds) to accept in a Retry-After header
+        # @param timeout [Integer] the request timeout in seconds (RestClient will use this to set both open and read timeouts)
         # @raise URI::InvalidURIError if the specified URL is invalid
         # rubocop:disable Metrics/ParameterLists
-        def initialize(method, url, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS)
+        def initialize(method, url, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS,
+                       timeout: DEFAULT_TIMEOUT_SECONDS)
           raise ArgumentError, "#{method} not supported" unless SUPPORTED_METHODS.include?(method)
           raise ArgumentError, 'url cannot be nil' unless (uri = Validator.uri_or_nil(url))
 
@@ -50,6 +53,7 @@ module BerkeleyLibrary
           @log = log
           @max_retries = max_retries
           @max_retry_delay = max_retry_delay
+          @timeout = timeout
         end
 
         # rubocop:enable Metrics/ParameterLists
@@ -73,7 +77,7 @@ module BerkeleyLibrary
         private
 
         def log_response(response)
-          return unless log
+          return unless log && response&.code
 
           logger.info("#{method.to_s.upcase} #{url_str} returned #{response.code}")
         end
@@ -90,6 +94,8 @@ module BerkeleyLibrary
 
         def execute_request(retries_remaining = max_retries)
           try_execute_request
+        rescue RestClient::Exceptions::Timeout
+          raise
         rescue RestClient::Exception => e
           response = e.response
           raise unless (retry_delay = retry_delay_from(response))
@@ -99,7 +105,7 @@ module BerkeleyLibrary
         end
 
         def try_execute_request
-          RestClient::Request.execute(method: method, url: url_str, headers: headers).tap do |response|
+          RestClient::Request.execute(method: method, url: url_str, headers: headers, timeout: timeout).tap do |response|
             # Not all failed RestClient requests throw exceptions
             raise(exception_for(response)) unless response.code == 200
           end
