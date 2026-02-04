@@ -63,8 +63,8 @@ module BerkeleyLibrary
       #   @yieldparam target [Object] the value to compare against
       #   @return [Array<Integer>, nil] the indices in `in_array` of each value in `for_array`,
       #     or `nil` if not all values could be found
-      def find_indices(for_array:, in_array:, &block)
-        return find_indices_matching(for_array, in_array, &block) if block_given?
+      def find_indices(for_array:, in_array:, &)
+        return find_indices_matching(for_array, in_array, &) if block_given?
 
         find_all_indices(for_array, in_array)
       end
@@ -89,10 +89,10 @@ module BerkeleyLibrary
       #   @param in_array [Array] the array to search
       #   @param start_index [Integer] the index to start with
       #   @return [Enumerator] a new enumerator
-      def find_index(*args, in_array:, start_index: 0, &block)
+      def find_index(*args, in_array:, start_index: 0, &)
         raise ArgumentError, "wrong number of arguments (given #{args.length}, expected 0..1" if args.size > 1
         return Enumerator.new { |y| find_index(in_array: in_array, start_index: start_index, &y) } if args.empty? && !block_given?
-        return unless (relative_index = in_array[start_index..].find_index(*args, &block))
+        return unless (relative_index = in_array[start_index..].find_index(*args, &))
 
         relative_index + start_index
       end

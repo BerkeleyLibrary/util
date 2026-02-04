@@ -13,9 +13,11 @@ module BerkeleyLibrary
           # @param log [Boolean] whether to log each request URL and response code
           # @param max_retries [Integer] the maximum number of times to retry after a 429 or 503 with Retry-After
           # @param max_retry_delay [Integer] the maximum retry delay (in seconds) to accept in a Retry-After header
+          # @param timeout [Integer] the request timeout in seconds (RestClient will use this to set both open and read timeouts)
           # @raise [RestClient::Exception] in the event of an unsuccessful request.
-          def get(uri, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS)
-            resp = make_request(:get, uri, params, headers, log, max_retries, max_retry_delay)
+          def get(uri, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS,
+                  timeout: DEFAULT_TIMEOUT_SECONDS)
+            resp = make_request(:get, uri, params, headers, log, max_retries, max_retry_delay, timeout)
             resp.body
           end
 
@@ -28,8 +30,10 @@ module BerkeleyLibrary
           # @param headers [Hash] the request headers.
           # @param log [Boolean] whether to log each request URL and response code
           # @return [Integer] the response code as an integer.
-          def head(uri, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS)
-            head_response(uri, params: params, headers: headers, log: log, max_retries: max_retries, max_retry_delay: max_retry_delay).code
+          def head(uri, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS,
+                   timeout: DEFAULT_TIMEOUT_SECONDS)
+            head_response(uri, params: params, headers: headers, log: log, max_retries: max_retries, max_retry_delay: max_retry_delay,
+                               timeout: timeout).code
           end
 
           # Performs a GET request and returns the response, even in the event of
@@ -40,8 +44,9 @@ module BerkeleyLibrary
           # @param headers [Hash] the request headers.
           # @param log [Boolean] whether to log each request URL and response code
           # @return [RestClient::Response] the response
-          def get_response(uri, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS)
-            make_request(:get, uri, params, headers, log, max_retries, max_retry_delay)
+          def get_response(uri, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS,
+                           timeout: DEFAULT_TIMEOUT_SECONDS)
+            make_request(:get, uri, params, headers, log, max_retries, max_retry_delay, timeout)
           rescue RestClient::Exception => e
             e.response
           end
@@ -54,15 +59,18 @@ module BerkeleyLibrary
           # @param headers [Hash] the request headers.
           # @param log [Boolean] whether to log each request URL and response code
           # @return [RestClient::Response] the response
-          def head_response(uri, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS)
-            make_request(:head, uri, params, headers, log, max_retries, max_retry_delay)
+          def head_response(uri, params: {}, headers: {}, log: true, max_retries: MAX_RETRIES, max_retry_delay: MAX_RETRY_DELAY_SECONDS,
+                            timeout: DEFAULT_TIMEOUT_SECONDS)
+            make_request(:head, uri, params, headers, log, max_retries, max_retry_delay, timeout)
           rescue RestClient::Exception => e
-            e.response
+            return e.response if e.response
+
+            raise
           end
 
           private
 
-          def make_request(method, url, params, headers, log, max_retries, max_retry_delay)
+          def make_request(method, url, params, headers, log, max_retries, max_retry_delay, timeout)
             Requester.new(
               method,
               url,
@@ -70,7 +78,8 @@ module BerkeleyLibrary
               headers: headers,
               log: log,
               max_retries: max_retries,
-              max_retry_delay: max_retry_delay
+              max_retry_delay: max_retry_delay,
+              timeout: timeout
             ).make_request
           end
 
